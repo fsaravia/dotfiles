@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Stolen from https://github.com/pote/dotfiles
 
 BLACKLIST=".
 ..
