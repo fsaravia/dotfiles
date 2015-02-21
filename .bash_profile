@@ -24,7 +24,7 @@ export GIT_PS1_SHOWUNTRACKEDFILES=true
 source /usr/local/etc/bash_completion.d/git-prompt.sh
 
 # Use PROMPT_COMMAND for a faster PS1 with __git_ps1
-export PROMPT="\[\033[1;33m\]\u@\h\[\033[0m\]:\W"
+PROMPT="\[\033[1;33m\]\u@\h\[\033[0m\]:\W"
 export PROMPT_COMMAND='update_terminal_cwd; __git_ps1 "$PROMPT" "\$ "'
 
 # Auto complete
