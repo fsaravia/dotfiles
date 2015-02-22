@@ -4,6 +4,7 @@
 BLACKLIST=".
 ..
 .git
+.osx
 "
 
 for file in .*
