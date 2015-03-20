@@ -25,7 +25,8 @@ source /usr/local/etc/bash_completion.d/git-prompt.sh
 
 # Use PROMPT_COMMAND for a faster PS1 with __git_ps1
 PROMPT="\[\033[1;33m\]\u@\h\[\033[0m\]:\W"
-export PROMPT_COMMAND='update_terminal_cwd; __git_ps1 "$PROMPT" "\$ "'
+export PROMPT_COMMAND='update_terminal_cwd; __git_ps1 "$PROMPT" "$([[ -z $GS_NAME ]] || echo -e " \[\033[0;35m\]{$GS_NAME}\[\033[0m\]")\$ "'
+
 
 # Auto complete
 complete -C aws_completer aws
@@ -37,6 +38,5 @@ fi
 #Aliases
 
 alias gist='gist -c'
-alias redis-cli='redis-cli -p 11001'
 alias grep='grep --color=auto'
 
