@@ -25,7 +25,7 @@ source /usr/local/etc/bash_completion.d/git-prompt.sh
 
 # Use PROMPT_COMMAND for a faster PS1 with __git_ps1
 PROMPT="\[\033[1;33m\]\u@\h\[\033[0m\]:\w"
-export PROMPT_COMMAND='update_terminal_cwd; __git_ps1 "$PROMPT" "$([[ -z $GS_NAME ]] || echo -e " \[\033[0;35m\]{$GS_NAME}\[\033[0m\]")\$ "'
+export PROMPT_COMMAND='update_terminal_cwd; __git_ps1 "$PROMPT" "$([[ -z $GS_NAME ]] || echo -e " \[\033[0;35m\]{$GS_NAME}\[\033[0m\]")\n\$ "'
 
 
 # Auto complete
