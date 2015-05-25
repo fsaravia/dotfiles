@@ -1,6 +1,8 @@
-export PATH="/usr/local/bin:/usr/local/sbin:$PATH"
 export ANDROID_HOME=/usr/local/opt/android-sdk
 export JAVA_HOME=$(/usr/libexec/java_home)
+export GOPATH=$HOME/Development/go
+
+export PATH="/usr/local/bin:/usr/local/sbin:$GOPATH/bin:$PATH"
 
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
