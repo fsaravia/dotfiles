@@ -22,5 +22,3 @@
   f  = fetch --prune
   changelog = log --abbrev-commit --pretty=format:'- %h - %s - %aN'
 
-[help]
-	autocorrect = 1
