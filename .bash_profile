@@ -48,4 +48,5 @@ fi
 
 alias gist='gist -c'
 alias grep='grep --color=auto'
+alias dm='docker-machine'
 
