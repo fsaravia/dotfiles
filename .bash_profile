@@ -5,7 +5,7 @@ export GOPATH=$HOME/Development/go
 # Workaround for Apple having removed the OpenSSL headers on El Capitan
 export OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2d_1
 
-export PATH="/usr/local/bin:/usr/local/sbin:~/bin::$GOPATH/bin:$PATH"
+export PATH="/usr/local/bin:/usr/local/sbin:$GOPATH/bin:$PATH"
 
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
