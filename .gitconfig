@@ -1,6 +1,7 @@
 [user]
   name = Federico Saravia
   email = fedesaravia@gmail.com
+	signingkey = 2437B1FD
 
 [push]
   default = simple
@@ -22,3 +23,5 @@
   f  = fetch --prune
   changelog = log --abbrev-commit --pretty=format:'- %h - %s - %aN'
 
+[commit]
+	gpgsign = true
