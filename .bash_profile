@@ -26,16 +26,6 @@ export GIT_PS1_SHOWSTASHSTATE=true
 export GIT_PS1_SHOWCOLORHINTS=true
 export GIT_PS1_SHOWUNTRACKEDFILES=true
 
-# Enable GPG agent
-if test -f ~/.gnupg/.gpg-agent-info -a -n "$(pgrep gpg-agent)"; then
-  source ~/.gnupg/.gpg-agent-info
-  export GPG_AGENT_INFO
-  GPG_TTY=$(tty)
-  export GPG_TTY
-else
-  eval $(gpg-agent --daemon --write-env-file ~/.gnupg/.gpg-agent-info)
-fi
-
 source /usr/local/etc/bash_completion.d/git-prompt.sh
 
 # Use PROMPT_COMMAND for a faster PS1 with __git_ps1
