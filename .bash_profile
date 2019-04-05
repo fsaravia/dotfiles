@@ -5,7 +5,10 @@ export GOPATH=$HOME/Development/go
 # Workaround for Apple having removed the OpenSSL headers on El Capitan
 export OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2d_1
 
-export PATH="/usr/local/bin:/usr/local/sbin:$GOPATH/bin:$PATH"
+export PATH="/usr/local/opt/ruby/bin:/usr/local/bin:/usr/local/sbin:/usr/local/lib/ruby/gems/2.6.0/bin:$GOPATH/bin:$PATH"
+
+export LDFLAGS="-L/usr/local/opt/ruby/lib"
+export CPPFLAGS="-I/usr/local/opt/ruby/include"
 
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
