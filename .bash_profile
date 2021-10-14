@@ -1,5 +1,5 @@
-export ANDROID_HOME=/usr/local/opt/android-sdk
-export JAVA_HOME=$(/usr/libexec/java_home)
+# export ANDROID_HOME=/usr/local/opt/android-sdk
+# export JAVA_HOME=$(/usr/libexec/java_home)
 export GOPATH=$HOME/Development/go
 
 # Workaround for Apple having removed the OpenSSL headers on El Capitan
