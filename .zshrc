@@ -13,15 +13,15 @@ export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
 # Workaround for Apple having removed the OpenSSL headers on El Capitan
 export OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2d_1
 
-# export PATH="/usr/local/opt/ruby/bin:/usr/local/bin:/usr/local/sbin:/usr/local/lib/ruby/gems/2.6.0/bin:$GOPATH/bin:$PATH"
+export PATH="/opt/homebrew/opt/ruby/bin:/opt/homebrew/lib/ruby/gems/3.0.0/bin:$PATH"
 
-# export LDFLAGS="-L/usr/local/opt/ruby/lib"
-# export CPPFLAGS="-I/usr/local/opt/ruby/include"
+export LDFLAGS="-L/opt/homebrew/opt/ruby/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/ruby/include"
 
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
-export EDITOR=/usr/local/bin/vim
+# export EDITOR=/usr/local/bin/vim
 
 # Add some colors
 export CLICOLOR=1
