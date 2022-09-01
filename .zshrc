@@ -1,5 +1,15 @@
 export GOPATH=$HOME/Development/go
 
+# Load homebrew
+# This can be automated by calling `brew shellenv` accoridng to Homebrew documentation
+# But I rather not have a third party script being invoked here
+export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
+export HOMEBREW_REPOSITORY="/opt/homebrew"
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}"
+export MANPATH="/opt/homebrew/share/man${MANPATH+:$MANPATH}:"
+export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}"
+
 # Workaround for Apple having removed the OpenSSL headers on El Capitan
 export OPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2d_1
 
