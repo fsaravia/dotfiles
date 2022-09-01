@@ -56,4 +56,4 @@ compinit
 alias gist='gist -c'
 alias grep='grep --color=auto'
 alias dm='docker-machine'
-alias fetchrebase='git fetch --prune && git rebase origin/master'
+alias fetchrebase='git fetch --prune && git rebase origin/main'

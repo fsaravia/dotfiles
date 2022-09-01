@@ -24,4 +24,6 @@
 	changelog = log --abbrev-commit --pretty=format:'- %h - %s - %aN'
 
 [commit]
-	gpgsign = true
+	#gpgsign = true
+[init]
+	defaultBranch = main
