@@ -1,7 +1,7 @@
 [user]
 	name = Federico Saravia
 	email = fedesaravia@gmail.com
-	signingkey = 2437B1FD
+	signingkey = 90A896492816CC9D
 
 [push]
 	default = simple
@@ -24,6 +24,6 @@
 	changelog = log --abbrev-commit --pretty=format:'- %h - %s - %aN'
 
 [commit]
-	#gpgsign = true
+	gpgsign = true
 [init]
 	defaultBranch = main
