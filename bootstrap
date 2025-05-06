@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Stolen from https://github.com/pote/dotfiles
 
-BLACKLIST=".
+DENYLIST=".
 ..
 .git
 .osx
@@ -9,9 +9,9 @@ BLACKLIST=".
 
 for file in .*
 do
-  if [[ $BLACKLIST =~ $file ]]
+  if [[ $DENYLIST =~ $file ]]
   then
-    echo Ignoring blacklisted file: $file
+    echo Ignoring denylisted file: $file
   else
     echo Creating symlink for: $file in $HOME
     ln -s $PWD/$file $HOME/$file
