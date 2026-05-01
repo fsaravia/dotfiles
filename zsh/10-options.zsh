@@ -1,0 +1,9 @@
+setopt auto_cd
+setopt hist_ignore_all_dups
+setopt hist_ignore_space
+setopt hist_reduce_blanks
+setopt hist_verify
+setopt inc_append_history
+setopt interactive_comments
+setopt prompt_subst
+setopt share_history
