@@ -2,8 +2,8 @@
 
 A small macOS-first setup with:
 
-- explicit symlink targets instead of wildcard magic
-- optional Homebrew bootstrapping and package installs
+- one small bootstrap command
+- one package install command
 - modern Zsh, tmux, Ghostty, and Git defaults
 - an opt-in macOS defaults script
 
@@ -15,16 +15,16 @@ Link the dotfiles:
 ./bootstrap
 ```
 
-Link dotfiles, install packages, and apply macOS defaults:
+Install packages:
 
 ```bash
-./bootstrap --all
+./install-packages
 ```
 
-Show available options:
+Apply macOS defaults:
 
 ```bash
-./bootstrap --help
+./macos-defaults.sh
 ```
 
 ## What gets linked
@@ -47,15 +47,4 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 - `ghostty`
 - `font-jetbrains-mono-nerd-font`
 
-## Notes
-
-- Flutter stays supported, but it now lives in a clearly marked work-only section in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:22).
-- GitHub CLI stays part of the default toolchain.
-
-## macOS defaults
-
-Run the script directly:
-
-```bash
-./macos-defaults.sh
-```
+Flutter stays supported in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:18), but only if the SDK exists at `~/Development/flutter/bin`.
