@@ -1,5 +1,3 @@
-tap "homebrew/cask-fonts"
-
 brew "eza"
 brew "fd"
 brew "fzf"
