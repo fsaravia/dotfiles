@@ -1,23 +1,192 @@
 #!/usr/bin/env bash
-# Stolen from https://github.com/pote/dotfiles
 
-DENYLIST=".
-..
-.git
-.osx
-"
+set -euo pipefail
 
-for file in .*
-do
-  if [[ $DENYLIST =~ $file ]]
-  then
-    echo Ignoring denylisted file: $file
-  else
-    echo Creating symlink for: $file in $HOME
-    ln -sfn "$PWD/$file" "$HOME/$file"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKUP_ROOT="${HOME}/.dotfiles-backups"
+TIMESTAMP="$(date +"%Y%m%d-%H%M%S")"
+BACKUP_DIR="${BACKUP_ROOT}/${TIMESTAMP}"
+
+INSTALL_HOMEBREW=false
+INSTALL_PACKAGES=false
+APPLY_MACOS_DEFAULTS=false
+
+cyan="$(printf '\033[36m')"
+green="$(printf '\033[32m')"
+yellow="$(printf '\033[33m')"
+red="$(printf '\033[31m')"
+bold="$(printf '\033[1m')"
+reset="$(printf '\033[0m')"
+
+home_links=(
+  ".gemrc:$HOME/.gemrc"
+  ".gitconfig:$HOME/.gitconfig"
+  ".gitignore:$HOME/.gitignore"
+  ".tmux.conf:$HOME/.tmux.conf"
+  ".zshrc:$HOME/.zshrc"
+)
+
+config_links=(
+  "ghostty:$HOME/.config/ghostty"
+)
+
+usage() {
+  cat <<EOF
+Usage: ./bootstrap [options]
+
+Options:
+  --install-homebrew     Install Homebrew if it is missing.
+  --install-packages     Install packages from Brewfile.
+  --apply-macos-defaults Apply macOS defaults from macos-defaults.sh.
+  --all                  Install Homebrew if needed, install packages, and apply macOS defaults.
+  -h, --help             Show this help message.
+EOF
+}
+
+info() {
+  printf "%b==>%b %s\n" "$cyan" "$reset" "$1"
+}
+
+success() {
+  printf "%b==>%b %s\n" "$green" "$reset" "$1"
+}
+
+warn() {
+  printf "%b==>%b %s\n" "$yellow" "$reset" "$1"
+}
+
+fail() {
+  printf "%b==>%b %s\n" "$red" "$reset" "$1" >&2
+  exit 1
+}
+
+ensure_backup_dir() {
+  mkdir -p "$BACKUP_DIR"
+}
+
+backup_path() {
+  local destination="$1"
+  local name
+
+  name="$(basename "$destination")"
+  ensure_backup_dir
+  mv "$destination" "$BACKUP_DIR/$name"
+  warn "Backed up $destination to $BACKUP_DIR/$name"
+}
+
+link_path() {
+  local source="$1"
+  local destination="$2"
+
+  mkdir -p "$(dirname "$destination")"
+
+  if [[ -e "$destination" && ! -L "$destination" ]]; then
+    backup_path "$destination"
   fi
+
+  ln -sfn "$source" "$destination"
+  success "Linked $destination -> $source"
+}
+
+link_declared_paths() {
+  local entry source destination
+
+  for entry in "${home_links[@]}"; do
+    source="${entry%%:*}"
+    destination="${entry#*:}"
+    link_path "$ROOT_DIR/$source" "$destination"
+  done
+
+  for entry in "${config_links[@]}"; do
+    source="${entry%%:*}"
+    destination="${entry#*:}"
+    link_path "$ROOT_DIR/$source" "$destination"
+  done
+}
+
+brew_bin() {
+  if command -v brew >/dev/null 2>&1; then
+    command -v brew
+  fi
+}
+
+install_homebrew() {
+  if [[ -n "$(brew_bin)" ]]; then
+    success "Homebrew already installed"
+    return
+  fi
+
+  if [[ "$INSTALL_HOMEBREW" != true ]]; then
+    warn "Homebrew is not installed. Re-run with --install-homebrew or --all to install it."
+    return
+  fi
+
+  info "Installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+}
+
+install_packages() {
+  local brew_path
+
+  brew_path="$(brew_bin)"
+  if [[ -z "$brew_path" ]]; then
+    warn "Skipping package installation because Homebrew is not available"
+    return
+  fi
+
+  if [[ "$INSTALL_PACKAGES" != true ]]; then
+    return
+  fi
+
+  info "Installing packages from Brewfile"
+  "$brew_path" bundle --file "$ROOT_DIR/Brewfile" --no-lock
+}
+
+apply_macos_defaults() {
+  if [[ "$APPLY_MACOS_DEFAULTS" != true ]]; then
+    return
+  fi
+
+  if [[ "$(uname -s)" != "Darwin" ]]; then
+    warn "Skipping macOS defaults because this is not macOS"
+    return
+  fi
+
+  info "Applying macOS defaults"
+  "$ROOT_DIR/macos-defaults.sh"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --install-homebrew)
+      INSTALL_HOMEBREW=true
+      ;;
+    --install-packages)
+      INSTALL_PACKAGES=true
+      ;;
+    --apply-macos-defaults)
+      APPLY_MACOS_DEFAULTS=true
+      ;;
+    --all)
+      INSTALL_HOMEBREW=true
+      INSTALL_PACKAGES=true
+      APPLY_MACOS_DEFAULTS=true
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      fail "Unknown option: $1"
+      ;;
+  esac
+  shift
 done
 
-mkdir -p "$HOME/.config"
-echo Creating symlink for: ghostty in $HOME/.config
-ln -sfn "$PWD/ghostty" "$HOME/.config/ghostty"
+info "${bold}Linking dotfiles${reset}"
+link_declared_paths
+install_homebrew
+install_packages
+apply_macos_defaults
+
+success "Bootstrap complete"
