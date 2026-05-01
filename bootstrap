@@ -1,23 +1,39 @@
 #!/usr/bin/env bash
-# Stolen from https://github.com/pote/dotfiles
 
-DENYLIST=".
-..
-.git
-.osx
-"
+set -euo pipefail
 
-for file in .*
-do
-  if [[ $DENYLIST =~ $file ]]
-  then
-    echo Ignoring denylisted file: $file
-  else
-    echo Creating symlink for: $file in $HOME
-    ln -sfn "$PWD/$file" "$HOME/$file"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKUP_DIR="$HOME/.dotfiles-backups/$(date +"%Y%m%d-%H%M%S")"
+
+links=(
+  "$ROOT_DIR/.gitconfig:$HOME/.gitconfig"
+  "$ROOT_DIR/.gitignore:$HOME/.gitignore"
+  "$ROOT_DIR/.zshrc:$HOME/.zshrc"
+  "$ROOT_DIR/ghostty:$HOME/.config/ghostty"
+)
+
+backup_path() {
+  local destination="$1"
+
+  mkdir -p "$BACKUP_DIR"
+  mv "$destination" "$BACKUP_DIR/$(basename "$destination")"
+  printf 'backed up %s to %s\n' "$destination" "$BACKUP_DIR"
+}
+
+link_path() {
+  local source="$1"
+  local destination="$2"
+
+  mkdir -p "$(dirname "$destination")"
+
+  if [[ -e "$destination" && ! -L "$destination" ]]; then
+    backup_path "$destination"
   fi
-done
 
-mkdir -p "$HOME/.config"
-echo Creating symlink for: ghostty in $HOME/.config
-ln -sfn "$PWD/ghostty" "$HOME/.config/ghostty"
+  ln -sfn "$source" "$destination"
+  printf 'linked %s -> %s\n' "$destination" "$source"
+}
+
+for entry in "${links[@]}"; do
+  link_path "${entry%%:*}" "${entry#*:}"
+done

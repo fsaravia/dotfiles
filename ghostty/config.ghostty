@@ -1,3 +1,19 @@
-shell-integration-features = ssh-env,ssh-terminfo
+theme = Carbonfox
+font-family = "JetBrainsMono Nerd Font"
+font-size = 14
+window-padding-x = 14
+window-padding-y = 12
+window-theme = ghostty
+macos-titlebar-style = tabs
+macos-option-as-alt = true
+
+shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
+clipboard-read = allow
+clipboard-write = allow
+copy-on-select = clipboard
+confirm-close-surface = false
+
 keybind = cmd+shift+left=previous_tab
 keybind = cmd+shift+right=next_tab
+keybind = alt+left=text:\x1bb
+keybind = alt+right=text:\x1bf

@@ -12,6 +12,9 @@
 [core]
 	excludesfile = ~/.gitignore
 
+[fetch]
+	prune = true
+
 [alias]
 	st = status
 	ci = commit
@@ -22,10 +25,17 @@
 	ll = log --graph --pretty=format:'%C(cyan)%h%Creset -%C(yellow)%d%Creset %s - %C(yellow)%aN%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
 	f  = fetch --prune
 	changelog = log --abbrev-commit --pretty=format:'- %h - %s - %aN'
+	graph = log --graph --decorate --oneline --all
 
 [commit]
 	gpgsign = true
 [init]
 	defaultBranch = main
+[merge]
+	conflictstyle = zdiff3
 [pager]
 	branch = false
+[pull]
+	ff = only
+[rerere]
+	enabled = true
