@@ -31,22 +31,13 @@ defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 defaults write com.apple.finder _FXSortFoldersFirst -bool true
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
-defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
 # Dock
 defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock mineffect -string "scale"
 defaults write com.apple.dock show-recents -bool false
 
-# Safari
-defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
-defaults write com.apple.Safari ShowFavoritesBar -bool false
-defaults write com.apple.Safari IncludeDevelopMenu -bool true
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
-defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
-
-for app in "Dock" "Finder" "Safari" "SystemUIServer"; do
+for app in "Dock" "Finder" "SystemUIServer"; do
   killall "$app" >/dev/null 2>&1 || true
 done
 

@@ -1,6 +1,6 @@
 # Dotfiles, 2026 edition
 
-A small macOS-first setup with:
+A small Apple Silicon macOS setup with:
 
 - one small bootstrap command
 - one package install command
