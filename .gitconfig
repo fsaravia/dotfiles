@@ -1,7 +1,7 @@
 [user]
 	name = Federico Saravia
 	email = fedesaravia@gmail.com
-	signingkey = 90A896492816CC9D
+	signingkey = FCB5920398614F4B8FA32D02581558F76A1FF832
 
 [push]
 	default = simple
@@ -27,3 +27,5 @@
 	gpgsign = true
 [init]
 	defaultBranch = main
+[pager]
+	branch = false
