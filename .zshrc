@@ -16,9 +16,13 @@ export PAGER="${PAGER:-less}"
 path=(
   "$HOME/.local/bin"
   "$HOME/.pub-cache/bin"
-  "$HOME/Development/flutter/bin"
   $path
 )
+
+# Work toolchains
+if [[ -d "$HOME/Development/flutter/bin" ]]; then
+  path=("$HOME/Development/flutter/bin" $path)
+fi
 
 for config_file in "$DOTFILES_ROOT"/zsh/*.zsh(N); do
   source "$config_file"

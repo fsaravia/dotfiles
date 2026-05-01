@@ -19,7 +19,6 @@ bold="$(printf '\033[1m')"
 reset="$(printf '\033[0m')"
 
 home_links=(
-  ".gemrc:$HOME/.gemrc"
   ".gitconfig:$HOME/.gitconfig"
   ".gitignore:$HOME/.gitignore"
   ".tmux.conf:$HOME/.tmux.conf"

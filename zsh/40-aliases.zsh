@@ -7,5 +7,4 @@ else
 fi
 
 alias grep='grep --color=auto'
-alias gist='gist -c'
 alias fetchrebase='git fetch --prune && git rebase origin/$(git branch --show-current)'

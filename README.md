@@ -29,7 +29,6 @@ Show available options:
 
 ## What gets linked
 
-- `~/.gemrc`
 - `~/.gitconfig`
 - `~/.gitignore`
 - `~/.tmux.conf`
@@ -47,6 +46,11 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 - `zsh-autosuggestions`, `zsh-syntax-highlighting`
 - `ghostty`
 - `font-jetbrains-mono-nerd-font`
+
+## Notes
+
+- Flutter stays supported, but it now lives in a clearly marked work-only section in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:22).
+- GitHub CLI stays part of the default toolchain.
 
 ## macOS defaults
 
