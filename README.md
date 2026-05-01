@@ -47,3 +47,12 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 - `font-jetbrains-mono-nerd-font`
 
 Flutter stays supported in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:18), but only if the SDK exists at `~/Development/flutter/bin`.
+
+## Git signing
+
+Commits are signed by default. Keep machine-specific signing keys out of the repo by setting them in `~/.gitconfig.local`:
+
+```bash
+cp .gitconfig.local.example ~/.gitconfig.local
+git config --file ~/.gitconfig.local user.signingkey <your-gpg-key-fingerprint>
+```

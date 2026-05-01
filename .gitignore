@@ -3,4 +3,4 @@
 .gs
 .tmux*
 .rubocop.yml
-
+.gitconfig.local

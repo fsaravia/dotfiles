@@ -1,7 +1,6 @@
 [user]
 	name = Federico Saravia
 	email = fedesaravia@gmail.com
-	signingkey = EF523F133A4FD3E8F207A70090A896492816CC9D
 
 [push]
 	default = simple
@@ -39,3 +38,5 @@
 	ff = only
 [rerere]
 	enabled = true
+[include]
+	path = ~/.gitconfig.local
