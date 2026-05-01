@@ -50,10 +50,8 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 
 ## macOS defaults
 
-Run the modern script directly:
+Run the script directly:
 
 ```bash
 ./macos-defaults.sh
 ```
-
-`./.osx` remains as a compatibility wrapper for old muscle memory.
