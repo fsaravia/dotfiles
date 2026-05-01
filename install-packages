@@ -11,4 +11,4 @@ if [[ ! -x "$BREW_BIN" ]]; then
 fi
 
 echo "Installing packages from Brewfile..."
-"$BREW_BIN" bundle --file "$ROOT_DIR/Brewfile" --no-lock
+"$BREW_BIN" bundle --file "$ROOT_DIR/Brewfile"

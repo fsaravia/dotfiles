@@ -1,7 +1,7 @@
 [user]
 	name = Federico Saravia
 	email = fedesaravia@gmail.com
-	signingkey = FCB5920398614F4B8FA32D02581558F76A1FF832
+	signingkey = EF523F133A4FD3E8F207A70090A896492816CC9D
 
 [push]
 	default = simple
