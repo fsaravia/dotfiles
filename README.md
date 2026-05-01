@@ -4,7 +4,7 @@ A small Apple Silicon macOS setup with:
 
 - one small bootstrap command
 - one package install command
-- modern Zsh, tmux, Ghostty, and Git defaults
+- modern Zsh, Ghostty, and Git defaults
 - an opt-in macOS defaults script
 
 ## Quick start
@@ -31,7 +31,6 @@ Apply macOS defaults:
 
 - `~/.gitconfig`
 - `~/.gitignore`
-- `~/.tmux.conf`
 - `~/.zshrc`
 - `~/.config/ghostty`
 
@@ -41,8 +40,8 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 
 `Brewfile` includes the core tooling this setup expects:
 
-- `eza`, `fd`, `ripgrep`, `bat`
-- `git`, `gh`, `tmux`
+- `eza`, `fd`, `fzf`, `ripgrep`
+- `git`, `gh`
 - `zsh-autosuggestions`, `zsh-syntax-highlighting`
 - `ghostty`
 - `font-jetbrains-mono-nerd-font`
