@@ -14,7 +14,10 @@ do
     echo Ignoring denylisted file: $file
   else
     echo Creating symlink for: $file in $HOME
-    ln -s $PWD/$file $HOME/$file
+    ln -sfn "$PWD/$file" "$HOME/$file"
   fi
 done
 
+mkdir -p "$HOME/.config"
+echo Creating symlink for: ghostty in $HOME/.config
+ln -sfn "$PWD/ghostty" "$HOME/.config/ghostty"
