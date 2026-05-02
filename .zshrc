@@ -45,6 +45,10 @@ autoload -Uz compinit colors vcs_info
 zmodload zsh/complist
 colors
 
+if [[ -d "$HOME/.local/share/zsh/site-functions" ]]; then
+  fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
+fi
+
 mkdir -p "$HOME/.cache/zsh"
 compinit -d "$HOME/.cache/zsh/.zcompdump"
 
@@ -81,6 +85,11 @@ if [[ -x /opt/homebrew/bin/brew ]]; then
   source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
   source /opt/homebrew/opt/fzf/shell/completion.zsh
   source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+fi
+
+# Manage tool versions with mise.
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
 fi
 
 # zsh-autosuggestions partially accepts suggestions when forward-word runs.
