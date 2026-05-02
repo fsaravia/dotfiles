@@ -17,3 +17,5 @@ keybind = cmd+shift+left=previous_tab
 keybind = cmd+shift+right=next_tab
 keybind = alt+left=text:\x1bb
 keybind = alt+right=text:\x1bf
+keybind = performable:cmd+c=copy_to_clipboard
+keybind = cmd+v=paste_from_clipboard
