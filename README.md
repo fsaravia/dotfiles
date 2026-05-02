@@ -40,11 +40,16 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 
 `Brewfile` includes the core tooling this setup expects:
 
-- `eza`, `fd`, `fzf`, `mise`, `ripgrep`
+- `bat`, `eza`, `fd`, `fzf`, `mise`, `ripgrep`, `zoxide`
 - `git`, `gh`
+- `git-delta`
 - `zsh-autosuggestions`, `zsh-syntax-highlighting`
 - `ghostty`
 - `font-jetbrains-mono-nerd-font`
+
+## Terminal upgrades
+
+Git diff, show, and patch logs are rendered through `delta`. Use `z <directory hint>` to jump to frequent directories, and `bat <file>` when you want a nicer file read than `cat`.
 
 Work-laptop Dart and Flutter paths stay supported in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:96), but only when `~/.pub-cache/bin` or `~/Development/flutter/bin` exist.
 

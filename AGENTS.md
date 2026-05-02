@@ -20,7 +20,7 @@ This is Federico's personal Apple Silicon macOS dotfiles repo. Keep changes smal
 - Keep scripts idempotent where practical.
 - Keep `git/ignore` limited to universal local noise such as OS metadata, temporary editor files, and tool caches. Do not add project files like language configs.
 - Do not introduce a plugin manager for zsh unless explicitly requested.
-- Do not hide missing required shell dependencies. Expected Brew-installed zsh plugins should fail loudly so the terminal points at what needs installing.
+- Do not guard commands or files installed by `Brewfile` in shell config. Missing expected tools should fail visibly so the terminal points at what needs installing.
 - It is fine to guard truly optional integrations, such as Docker completions or work-laptop Dart/Flutter paths.
 - Keep machine-specific or secret values out of the repo. Use `~/.config/git/config.local` for local Git signing keys.
 

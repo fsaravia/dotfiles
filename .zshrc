@@ -63,30 +63,24 @@ precmd() {
 PROMPT=$'%F{81}%n%f %F{244}in%f %F{228}%~%f${vcs_info_msg_0_}\n%(?.%F{42}.%F{196})❯%f '
 RPROMPT='%F{240}%*%f'
 
-# Prefer modern replacements when available.
-if command -v eza >/dev/null 2>&1; then
-  alias ls='eza --group-directories-first --icons=auto'
-  alias ll='eza -lah --git --group-directories-first --icons=auto'
-else
-  alias ls='ls -G'
-  alias ll='ls -lahG'
-fi
+# Prefer modern replacements.
+alias ls='eza --group-directories-first --icons=auto'
+alias ll='eza -lah --git --group-directories-first --icons=auto'
 
 alias grep='grep --color=auto'
 alias fetchrebase='git fetch --prune && git rebase origin/$(git branch --show-current)'
 
 # Brew-installed shell niceties.
-if [[ -x /opt/homebrew/bin/brew ]]; then
-  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-  source /opt/homebrew/opt/fzf/shell/completion.zsh
-  source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
-fi
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /opt/homebrew/opt/fzf/shell/completion.zsh
+source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
 
 # Manage tool versions with mise.
-if command -v mise >/dev/null 2>&1; then
-  eval "$(mise activate zsh)"
-fi
+eval "$(mise activate zsh)"
+
+# Jump to frequent directories.
+eval "$(zoxide init zsh)"
 
 # zsh-autosuggestions partially accepts suggestions when forward-word runs.
 bindkey '^[f' forward-word

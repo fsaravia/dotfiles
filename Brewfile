@@ -1,10 +1,13 @@
+brew "bat"
 brew "eza"
 brew "fd"
 brew "fzf"
 brew "gh"
 brew "git"
+brew "git-delta"
 brew "mise"
 brew "ripgrep"
+brew "zoxide"
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
 

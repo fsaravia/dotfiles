@@ -8,6 +8,9 @@
 [color]
 	ui = true
 
+[core]
+	pager = delta
+
 [fetch]
 	prune = true
 
@@ -25,6 +28,10 @@
 
 [commit]
 	gpgsign = true
+[delta]
+	navigate = true
+[interactive]
+	diffFilter = delta --color-only
 [init]
 	defaultBranch = main
 [merge]
