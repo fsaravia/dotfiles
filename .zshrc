@@ -17,6 +17,15 @@ path=(
   $path
 )
 
+# Work laptop toolchains.
+if [[ -d "$HOME/.pub-cache/bin" ]]; then
+  path=("$HOME/.pub-cache/bin" $path)
+fi
+
+if [[ -d "$HOME/Development/flutter/bin" ]]; then
+  path=("$HOME/Development/flutter/bin" $path)
+fi
+
 # Shell behavior: history, navigation, and interactive quality-of-life.
 setopt auto_cd
 setopt hist_ignore_all_dups
@@ -87,12 +96,3 @@ bindkey '^[f' forward-word
 bindkey '^[[1;3C' forward-word
 bindkey '^[b' backward-word
 bindkey '^[[1;3D' backward-word
-
-# Work laptop toolchains.
-if [[ -d "$HOME/.pub-cache/bin" ]]; then
-  path=("$HOME/.pub-cache/bin" $path)
-fi
-
-if [[ -d "$HOME/Development/flutter/bin" ]]; then
-  path=("$HOME/Development/flutter/bin" $path)
-fi
