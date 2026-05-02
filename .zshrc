@@ -33,6 +33,9 @@ setopt interactive_comments
 setopt prompt_subst
 setopt share_history
 
+# Keep path segments as separate words for Option+Arrow navigation.
+WORDCHARS="${WORDCHARS//\/}"
+
 export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=50000
 export SAVEHIST=50000
@@ -79,3 +82,9 @@ if [[ -x /opt/homebrew/bin/brew ]]; then
   [[ -f /opt/homebrew/opt/fzf/shell/completion.zsh ]] && source /opt/homebrew/opt/fzf/shell/completion.zsh
   [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]] && source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
 fi
+
+# zsh-autosuggestions partially accepts suggestions when forward-word runs.
+bindkey '^[f' forward-word
+bindkey '^[[1;3C' forward-word
+bindkey '^[b' backward-word
+bindkey '^[[1;3D' backward-word
