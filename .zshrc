@@ -11,16 +11,11 @@ if [[ -x /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-# Personal binaries first, then work-only SDKs if present.
+# Personal binaries first.
 path=(
   "$HOME/.local/bin"
-  "$HOME/.pub-cache/bin"
   $path
 )
-
-if [[ -d "$HOME/Development/flutter/bin" ]]; then
-  path=("$HOME/Development/flutter/bin" $path)
-fi
 
 # Shell behavior: history, navigation, and interactive quality-of-life.
 setopt auto_cd
@@ -98,3 +93,12 @@ bindkey '^[f' forward-word
 bindkey '^[[1;3C' forward-word
 bindkey '^[b' backward-word
 bindkey '^[[1;3D' backward-word
+
+# Work laptop toolchains.
+if [[ -d "$HOME/.pub-cache/bin" ]]; then
+  path=("$HOME/.pub-cache/bin" $path)
+fi
+
+if [[ -d "$HOME/Development/flutter/bin" ]]; then
+  path=("$HOME/Development/flutter/bin" $path)
+fi

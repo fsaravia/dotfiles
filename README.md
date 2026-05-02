@@ -46,7 +46,7 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 - `ghostty`
 - `font-jetbrains-mono-nerd-font`
 
-Flutter stays supported in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:18), but only if the SDK exists at `~/Development/flutter/bin`.
+Work-laptop Dart and Flutter paths stay supported in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:96), but only when `~/.pub-cache/bin` or `~/Development/flutter/bin` exist.
 
 `mise` is installed and activated for project-local tool versions. This repo does not pin global language runtimes; individual projects can use `mise.toml` or `.tool-versions`.
 
