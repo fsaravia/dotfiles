@@ -48,7 +48,7 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 
 Flutter stays supported in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:18), but only if the SDK exists at `~/Development/flutter/bin`.
 
-Node versions are managed by `mise`. This setup keeps a single global Node 22 by default, while project-specific `mise.toml` or `.tool-versions` files can opt into stricter pins.
+`mise` is installed and activated for project-local tool versions. This repo does not pin global language runtimes; individual projects can use `mise.toml` or `.tool-versions`.
 
 If Docker is installed, `install-packages` generates zsh completions into `~/.local/share/zsh/site-functions`.
 
