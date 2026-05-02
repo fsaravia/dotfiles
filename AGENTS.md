@@ -5,7 +5,7 @@ This is Federico's personal Apple Silicon macOS dotfiles repo. Keep changes smal
 ## Repo Shape
 
 - `.zshrc` is the main interactive shell config.
-- `.gitconfig` is linked directly into `$HOME`.
+- `git/config` is linked to `~/.config/git/config`, Git's default XDG config path.
 - `git/ignore` is linked to `~/.config/git/ignore`, Git's default global ignore path.
 - `ghostty/` is linked to `~/.config/ghostty`.
 - `Brewfile` is the source of truth for Homebrew packages expected by the shell.
@@ -22,7 +22,7 @@ This is Federico's personal Apple Silicon macOS dotfiles repo. Keep changes smal
 - Do not introduce a plugin manager for zsh unless explicitly requested.
 - Do not hide missing required shell dependencies. Expected Brew-installed zsh plugins should fail loudly so the terminal points at what needs installing.
 - It is fine to guard truly optional integrations, such as Docker completions or a locally installed Flutter SDK.
-- Keep machine-specific or secret values out of the repo. Use `.gitconfig.local` for local Git signing keys.
+- Keep machine-specific or secret values out of the repo. Use `~/.config/git/config.local` for local Git signing keys.
 
 ## Validation
 

@@ -29,7 +29,7 @@ Apply macOS defaults:
 
 ## What gets linked
 
-- `~/.gitconfig`
+- `~/.config/git/config`
 - `~/.config/git/ignore`
 - `~/.zshrc`
 - `~/.config/ghostty`
@@ -54,9 +54,9 @@ If Docker is installed, `install-packages` generates zsh completions into `~/.lo
 
 ## Git signing
 
-Commits are signed by default. Keep machine-specific signing keys out of the repo by setting them in `~/.gitconfig.local`:
+Commits are signed by default. Keep machine-specific signing keys out of the repo by setting them in `~/.config/git/config.local`:
 
 ```bash
-cp .gitconfig.local.example ~/.gitconfig.local
-git config --file ~/.gitconfig.local user.signingkey <your-gpg-key-fingerprint>
+cp git/config.local.example ~/.config/git/config.local
+git config --file ~/.config/git/config.local user.signingkey <your-gpg-key-fingerprint>
 ```

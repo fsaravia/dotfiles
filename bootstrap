@@ -6,7 +6,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.dotfiles-backups/$(date +"%Y%m%d-%H%M%S")"
 
 links=(
-  "$ROOT_DIR/.gitconfig:$HOME/.gitconfig"
+  "$ROOT_DIR/git/config:$HOME/.config/git/config"
   "$ROOT_DIR/git/ignore:$HOME/.config/git/ignore"
   "$ROOT_DIR/.zshrc:$HOME/.zshrc"
   "$ROOT_DIR/ghostty:$HOME/.config/ghostty"
