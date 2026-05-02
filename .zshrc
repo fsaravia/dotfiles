@@ -75,12 +75,12 @@ fi
 alias grep='grep --color=auto'
 alias fetchrebase='git fetch --prune && git rebase origin/$(git branch --show-current)'
 
-# Optional Brew-installed shell niceties.
+# Brew-installed shell niceties.
 if [[ -x /opt/homebrew/bin/brew ]]; then
-  [[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-  [[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-  [[ -f /opt/homebrew/opt/fzf/shell/completion.zsh ]] && source /opt/homebrew/opt/fzf/shell/completion.zsh
-  [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]] && source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+  source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+  source /opt/homebrew/opt/fzf/shell/completion.zsh
+  source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
 fi
 
 # zsh-autosuggestions partially accepts suggestions when forward-word runs.
