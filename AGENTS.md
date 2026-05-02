@@ -11,6 +11,7 @@ This is Federico's personal Apple Silicon macOS dotfiles repo. Keep changes smal
 - `Brewfile` is the source of truth for Homebrew packages expected by the shell.
 - `bootstrap` creates symlinks and backs up existing real files into `~/.dotfiles-backups/<timestamp>/`.
 - `install-packages` installs Homebrew if needed, runs `brew bundle`, and generates optional Docker zsh completions when Docker is present.
+- `cleanup-home` removes generated caches, stale dotfile paths, and selected orphaned app support folders.
 - `macos-defaults.sh` applies opt-in macOS preferences.
 
 ## Editing Principles
@@ -29,7 +30,7 @@ This is Federico's personal Apple Silicon macOS dotfiles repo. Keep changes smal
 Run the lightest relevant checks after edits:
 
 - `.zshrc`: `zsh -n .zshrc`
-- Bash scripts: `bash -n bootstrap install-packages macos-defaults.sh`
+- Bash scripts: `bash -n bootstrap install-packages cleanup-home macos-defaults.sh`
 - Brewfile changes: `brew bundle check --file Brewfile` when Homebrew is available and checking the local machine is useful.
 
 Avoid running `bootstrap`, `install-packages`, or `macos-defaults.sh` without the user's explicit intent. They mutate the user's home directory, install software, or change system preferences.
