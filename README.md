@@ -30,7 +30,7 @@ Apply macOS defaults:
 ## What gets linked
 
 - `~/.gitconfig`
-- `~/.gitignore`
+- `~/.config/git/ignore`
 - `~/.zshrc`
 - `~/.config/ghostty`
 

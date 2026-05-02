@@ -8,9 +8,6 @@
 [color]
 	ui = true
 
-[core]
-	excludesfile = ~/.gitignore
-
 [fetch]
 	prune = true
 

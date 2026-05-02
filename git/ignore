@@ -1,0 +1,13 @@
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# Editor and shell scratch files.
+*~
+*.swp
+*.swo
+.direnv/
