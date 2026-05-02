@@ -1,4 +1,4 @@
-theme = Carbonfox
+theme = dark:Catppuccin Mocha,light:Catppuccin Frappe
 font-family = "JetBrainsMono Nerd Font"
 font-size = 14
 window-padding-x = 14
