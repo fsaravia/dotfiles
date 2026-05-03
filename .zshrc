@@ -39,6 +39,7 @@ setopt share_history
 
 # Keep path segments as separate words for Option+Arrow navigation.
 WORDCHARS="${WORDCHARS//\/}"
+WORDCHARS="${WORDCHARS//-}"
 
 mkdir -p "$HOME/.local/state/zsh"
 export HISTFILE="$HOME/.local/state/zsh/history"
