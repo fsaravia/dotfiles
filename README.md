@@ -51,7 +51,7 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 
 Git diff, show, and patch logs are rendered through `delta`. Use `z <directory hint>` to jump to frequent directories, and `bat <file>` when you want a nicer file read than `cat`.
 
-Work-laptop Dart and Flutter paths stay supported in [.zshrc](/Users/fsaravia/Development/dotfiles/.zshrc:96), but only when `~/.pub-cache/bin` or `~/Development/flutter/bin` exist.
+Work-laptop Dart and Flutter paths stay supported in [`.zshrc`](.zshrc), but only when `~/.pub-cache/bin` or `~/Development/flutter/bin` exist.
 
 `mise` is installed and activated for project-local tool versions. This repo does not pin global language runtimes; individual projects can use `mise.toml` or `.tool-versions`.
 
