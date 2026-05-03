@@ -43,9 +43,20 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 - `bat`, `eza`, `fd`, `fzf`, `mise`, `ripgrep`, `zoxide`
 - `git`, `gh`
 - `git-delta`
+- `shellcheck`
 - `zsh-autosuggestions`, `zsh-syntax-highlighting`
 - `ghostty`
 - `font-jetbrains-mono-nerd-font`
+
+## Validation
+
+Check shell config and scripts with:
+
+```bash
+zsh -n .zshrc
+bash -n bootstrap install-packages macos-defaults.sh
+shellcheck bootstrap install-packages macos-defaults.sh
+```
 
 ## Terminal upgrades
 
