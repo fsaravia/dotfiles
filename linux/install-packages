@@ -35,7 +35,12 @@ available_packages=()
 apt_get=(apt-get)
 
 if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
-  apt_get=(sudo apt-get)
+  if ! sudo -n true 2>/dev/null; then
+    echo "linux/install-packages requires root or passwordless sudo"
+    exit 1
+  fi
+
+  apt_get=(sudo -n apt-get)
 fi
 
 echo "Updating apt package metadata..."
