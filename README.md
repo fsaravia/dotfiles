@@ -27,13 +27,6 @@ Apply macOS defaults:
 ./macos-defaults.sh
 ```
 
-Clean old generated caches and stale home-directory dotfile paths:
-
-```bash
-./cleanup-home --dry-run
-./cleanup-home --yes
-```
-
 ## What gets linked
 
 - `~/.config/git/config`
