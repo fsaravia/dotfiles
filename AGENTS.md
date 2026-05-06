@@ -14,7 +14,6 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - `linux/` contains the Linux profile for owned Debian/Ubuntu-style hosts.
 - `linux/install-packages` installs apt packages and generates optional Docker zsh completions when Docker is present.
 - `linux/bootstrap` creates Linux symlinks, backs up existing real files into `~/.dotfiles-backups/<timestamp>/`, and sets zsh as the login shell when root or passwordless sudo is available.
-- `cleanup-home` removes generated caches, stale dotfile paths, and selected orphaned app support folders.
 - `macos-defaults.sh` applies opt-in macOS preferences.
 
 ## Editing Principles
@@ -37,7 +36,7 @@ Run the lightest relevant checks after edits:
 
 - `.zshrc`: `zsh -n .zshrc`
 - `linux/.zshrc`: `zsh -n linux/.zshrc`
-- Bash scripts: `bash -n bootstrap linux/bootstrap install-packages linux/install-packages cleanup-home macos-defaults.sh`
+- Bash scripts: `bash -n bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh`
 - Brewfile changes: `brew bundle check --file Brewfile` when Homebrew is available and checking the local machine is useful.
 
 Avoid running `bootstrap`, `linux/bootstrap`, `install-packages`, `linux/install-packages`, or `macos-defaults.sh` without the user's explicit intent. They mutate the user's home directory, install software, or change system preferences.

@@ -81,8 +81,8 @@ Check shell config and scripts with:
 ```bash
 zsh -n .zshrc
 zsh -n linux/.zshrc
-bash -n bootstrap linux/bootstrap install-packages linux/install-packages cleanup-home macos-defaults.sh
-shellcheck bootstrap linux/bootstrap install-packages linux/install-packages cleanup-home macos-defaults.sh
+bash -n bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh
+shellcheck bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh
 ```
 
 ## Terminal upgrades
