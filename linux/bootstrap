@@ -42,3 +42,24 @@ link_path() {
 for entry in "${links[@]}"; do
   link_path "${entry%%:*}" "${entry#*:}"
 done
+
+if ! zsh_path="$(command -v zsh)"; then
+  echo "warning: could not set zsh as the login shell; zsh is not installed"
+  exit 0
+fi
+
+user_name="$(id -un)"
+current_shell="$(getent passwd "$user_name" | cut -d: -f7)"
+
+if [[ "$current_shell" != "$zsh_path" ]]; then
+  if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+    usermod --shell "$zsh_path" "$user_name"
+  elif sudo -n true 2>/dev/null; then
+    sudo -n usermod --shell "$zsh_path" "$user_name"
+  else
+    echo "warning: could not set zsh as the login shell; root or passwordless sudo is required"
+    exit 0
+  fi
+
+  printf 'set login shell for %s to %s\n' "$user_name" "$zsh_path"
+fi

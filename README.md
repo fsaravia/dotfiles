@@ -39,6 +39,8 @@ Owned Linux hosts can use the Linux profile:
 
 The Linux package installer targets Debian, Ubuntu, and other apt-based hosts. It warns about package names missing from the host's apt repositories and installs the packages it can find. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
 
+`linux/bootstrap` also sets zsh as the login shell when root or passwordless sudo is available.
+
 ## What gets linked
 
 - `~/.config/git/config`
