@@ -1,0 +1,42 @@
+[user]
+	name = Federico Saravia
+	email = fedesaravia@gmail.com
+
+[push]
+	default = simple
+
+[color]
+	ui = true
+
+[fetch]
+	prune = true
+
+[alias]
+	st = status
+	ci = commit
+	br = branch
+	co = checkout
+	df = diff
+	lg = log -p
+	ll = log --graph --pretty=format:'%C(cyan)%h%Creset -%C(yellow)%d%Creset %s - %C(yellow)%aN%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+	f  = fetch --prune
+	changelog = log --abbrev-commit --pretty=format:'- %h - %s - %aN'
+	graph = log --graph --decorate --oneline --all
+
+[init]
+	defaultBranch = main
+
+[merge]
+	conflictstyle = zdiff3
+
+[pager]
+	branch = false
+
+[pull]
+	ff = only
+
+[rerere]
+	enabled = true
+
+[include]
+	path = ~/.config/git/config.local

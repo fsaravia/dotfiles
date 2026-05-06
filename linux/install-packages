@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ "$(uname -s)" != "Linux" ]]; then
+  echo "linux/install-packages only supports Linux"
+  exit 1
+fi
+
+if ! command -v apt-get >/dev/null 2>&1; then
+  echo "linux/install-packages expects apt-get"
+  exit 1
+fi
+
+packages=(
+  bat
+  eza
+  fd-find
+  fzf
+  gh
+  git
+  git-delta
+  mise
+  ripgrep
+  shellcheck
+  vim
+  zoxide
+  zsh
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
+
+available_packages=()
+
+apt_get=(apt-get)
+
+if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+  if ! sudo -n true 2>/dev/null; then
+    echo "linux/install-packages requires root or passwordless sudo"
+    exit 1
+  fi
+
+  apt_get=(sudo -n apt-get)
+fi
+
+echo "Updating apt package metadata..."
+"${apt_get[@]}" update
+
+for package in "${packages[@]}"; do
+  if apt-cache show "$package" >/dev/null 2>&1; then
+    available_packages+=("$package")
+  else
+    echo "warning: apt package not found: $package"
+  fi
+done
+
+if [[ "${#available_packages[@]}" -eq 0 ]]; then
+  echo "No requested apt packages are available."
+  exit 1
+fi
+
+echo "Installing Linux packages..."
+"${apt_get[@]}" install -y "${available_packages[@]}"
+
+ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
+
+if command -v docker >/dev/null 2>&1; then
+  echo "Installing Docker zsh completions..."
+  mkdir -p "$ZSH_SITE_FUNCTIONS"
+  docker completion zsh > "$ZSH_SITE_FUNCTIONS/_docker"
+fi

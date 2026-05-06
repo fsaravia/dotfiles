@@ -6,6 +6,7 @@ A small Apple Silicon macOS setup with:
 - one package install command
 - modern Zsh, Vim, Ghostty, and Git defaults
 - an opt-in macOS defaults script
+- a small Linux profile for owned SSH hosts
 
 ## Quick start
 
@@ -27,6 +28,19 @@ Apply macOS defaults:
 ./macos-defaults.sh
 ```
 
+## Linux hosts
+
+Owned Linux hosts can use the Linux profile:
+
+```bash
+./linux/install-packages
+./linux/bootstrap
+```
+
+The Linux package installer targets Debian, Ubuntu, and other apt-based hosts. It warns about package names missing from the host's apt repositories and installs the packages it can find. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
+
+`linux/bootstrap` also sets zsh as the login shell when root or passwordless sudo is available.
+
 ## What gets linked
 
 - `~/.config/git/config`
@@ -36,6 +50,17 @@ Apply macOS defaults:
 - `~/.config/ghostty`
 
 If a destination already exists as a real file or directory, `bootstrap` moves it into `~/.dotfiles-backups/<timestamp>/` before linking.
+
+`linux/bootstrap` links:
+
+- `~/.config/git/config`
+- `~/.config/git/ignore`
+- `~/.zshrc`
+- `~/.vimrc`
+
+Linux uses [`linux/git/config`](linux/git/config), which keeps shared Git defaults but leaves workstation-specific signing and `delta` configuration out of the base server profile.
+
+The Linux zsh config assumes Debian/Ubuntu package paths for fzf and zsh plugins under `/usr/share`.
 
 ## Packages
 
@@ -55,8 +80,9 @@ Check shell config and scripts with:
 
 ```bash
 zsh -n .zshrc
-bash -n bootstrap install-packages macos-defaults.sh
-shellcheck bootstrap install-packages macos-defaults.sh
+zsh -n linux/.zshrc
+bash -n bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh
+shellcheck bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh
 ```
 
 ## Terminal upgrades
