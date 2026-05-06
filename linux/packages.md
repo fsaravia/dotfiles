@@ -24,4 +24,6 @@ It installs:
 - `zsh-autosuggestions`
 - `zsh-syntax-highlighting`
 
-On Debian or Ubuntu hosts, the zsh config expects the packaged completion and plugin files under `/usr/share`.
+If a package name is unavailable in the host's apt repositories, the installer prints a warning and installs the packages it can find.
+
+The zsh config assumes Debian/Ubuntu package paths for fzf and zsh plugins under `/usr/share`.

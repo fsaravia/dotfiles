@@ -30,6 +30,9 @@ packages=(
   zsh-syntax-highlighting
 )
 
+available_packages=()
+missing_packages=()
+
 apt_get=(apt-get)
 
 if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
@@ -39,8 +42,25 @@ fi
 echo "Updating apt package metadata..."
 "${apt_get[@]}" update
 
+for package in "${packages[@]}"; do
+  if apt-cache show "$package" >/dev/null 2>&1; then
+    available_packages+=("$package")
+  else
+    missing_packages+=("$package")
+  fi
+done
+
+for package in "${missing_packages[@]}"; do
+  echo "warning: apt package not found: $package"
+done
+
+if [[ "${#available_packages[@]}" -eq 0 ]]; then
+  echo "No requested apt packages are available."
+  exit 1
+fi
+
 echo "Installing Linux packages..."
-"${apt_get[@]}" install -y "${packages[@]}"
+"${apt_get[@]}" install -y "${available_packages[@]}"
 
 ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
 

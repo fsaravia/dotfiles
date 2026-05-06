@@ -56,6 +56,8 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 - `~/.zshrc`
 - `~/.vimrc`
 
+Linux uses [`linux/git/config`](linux/git/config), which keeps shared Git defaults but leaves workstation-specific signing and `delta` configuration out of the base server profile.
+
 ## Packages
 
 `Brewfile` includes the core tooling this setup expects:

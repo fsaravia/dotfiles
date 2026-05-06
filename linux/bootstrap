@@ -11,7 +11,7 @@ if [[ "$(uname -s)" != "Linux" ]]; then
 fi
 
 links=(
-  "$ROOT_DIR/git/config:$HOME/.config/git/config"
+  "$ROOT_DIR/linux/git/config:$HOME/.config/git/config"
   "$ROOT_DIR/git/ignore:$HOME/.config/git/ignore"
   "$ROOT_DIR/linux/.zshrc:$HOME/.zshrc"
   "$ROOT_DIR/.vimrc:$HOME/.vimrc"
