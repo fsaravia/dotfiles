@@ -31,7 +31,6 @@ packages=(
 )
 
 available_packages=()
-missing_packages=()
 
 apt_get=(apt-get)
 
@@ -46,12 +45,8 @@ for package in "${packages[@]}"; do
   if apt-cache show "$package" >/dev/null 2>&1; then
     available_packages+=("$package")
   else
-    missing_packages+=("$package")
+    echo "warning: apt package not found: $package"
   fi
-done
-
-for package in "${missing_packages[@]}"; do
-  echo "warning: apt package not found: $package"
 done
 
 if [[ "${#available_packages[@]}" -eq 0 ]]; then

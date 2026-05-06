@@ -37,7 +37,7 @@ Owned Linux hosts can use the Linux profile:
 ./linux/bootstrap
 ```
 
-The Linux package installer targets Debian, Ubuntu, and other apt-based hosts; see [`linux/packages.md`](linux/packages.md). The Linux profile links the shared Vim and Git files, but uses [`linux/.zshrc`](linux/.zshrc) instead of the macOS shell config.
+The Linux package installer targets Debian, Ubuntu, and other apt-based hosts. It warns about package names missing from the host's apt repositories and installs the packages it can find. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
 
 ## What gets linked
 
@@ -57,6 +57,8 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 - `~/.vimrc`
 
 Linux uses [`linux/git/config`](linux/git/config), which keeps shared Git defaults but leaves workstation-specific signing and `delta` configuration out of the base server profile.
+
+The Linux zsh config assumes Debian/Ubuntu package paths for fzf and zsh plugins under `/usr/share`.
 
 ## Packages
 
