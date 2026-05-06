@@ -4,7 +4,7 @@ A small Apple Silicon macOS setup with:
 
 - one small bootstrap command
 - one package install command
-- modern Zsh, Ghostty, and Git defaults
+- modern Zsh, Vim, Ghostty, and Git defaults
 - an opt-in macOS defaults script
 
 ## Quick start
@@ -39,6 +39,7 @@ Clean old generated caches and stale home-directory dotfile paths:
 - `~/.config/git/config`
 - `~/.config/git/ignore`
 - `~/.zshrc`
+- `~/.vimrc`
 - `~/.config/ghostty`
 
 If a destination already exists as a real file or directory, `bootstrap` moves it into `~/.dotfiles-backups/<timestamp>/` before linking.

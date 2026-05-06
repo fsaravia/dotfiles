@@ -9,6 +9,7 @@ links=(
   "$ROOT_DIR/git/config:$HOME/.config/git/config"
   "$ROOT_DIR/git/ignore:$HOME/.config/git/ignore"
   "$ROOT_DIR/.zshrc:$HOME/.zshrc"
+  "$ROOT_DIR/.vimrc:$HOME/.vimrc"
   "$ROOT_DIR/ghostty:$HOME/.config/ghostty"
 )
 
