@@ -33,10 +33,11 @@ Apply macOS defaults:
 Owned Linux hosts can use the Linux profile:
 
 ```bash
+./linux/install-packages
 ./linux/bootstrap
 ```
 
-Install the expected packages first; see [`linux/packages.md`](linux/packages.md). The Linux profile links the shared Vim and Git files, but uses [`linux/.zshrc`](linux/.zshrc) instead of the macOS shell config.
+The Linux package installer targets Debian, Ubuntu, and other apt-based hosts; see [`linux/packages.md`](linux/packages.md). The Linux profile links the shared Vim and Git files, but uses [`linux/.zshrc`](linux/.zshrc) instead of the macOS shell config.
 
 ## What gets linked
 
@@ -74,8 +75,8 @@ Check shell config and scripts with:
 ```bash
 zsh -n .zshrc
 zsh -n linux/.zshrc
-bash -n bootstrap linux/bootstrap install-packages macos-defaults.sh
-shellcheck bootstrap linux/bootstrap install-packages macos-defaults.sh
+bash -n bootstrap linux/bootstrap install-packages linux/install-packages cleanup-home macos-defaults.sh
+shellcheck bootstrap linux/bootstrap install-packages linux/install-packages cleanup-home macos-defaults.sh
 ```
 
 ## Terminal upgrades

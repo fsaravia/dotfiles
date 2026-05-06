@@ -1,16 +1,26 @@
 # Linux Packages
 
-Install these packages on owned Linux hosts before running `./linux/bootstrap`:
+Run the apt-based installer on Debian, Ubuntu, and similar hosts:
 
-- `zsh`
-- `vim`
+```bash
+./linux/install-packages
+```
+
+It installs:
+
+- `bat`
+- `eza`
+- `fd-find`
+- `fzf`
+- `gh`
 - `git`
 - `git-delta`
-- `eza`
-- `fzf`
 - `mise`
 - `ripgrep`
+- `shellcheck`
+- `vim`
 - `zoxide`
+- `zsh`
 - `zsh-autosuggestions`
 - `zsh-syntax-highlighting`
 
