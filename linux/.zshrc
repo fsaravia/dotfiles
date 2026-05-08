@@ -72,9 +72,6 @@ source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /usr/share/doc/fzf/examples/completion.zsh
 source /usr/share/doc/fzf/examples/key-bindings.zsh
 
-# Manage tool versions with mise.
-eval "$(mise activate zsh)"
-
 # Jump to frequent directories.
 eval "$(zoxide init zsh)"
 

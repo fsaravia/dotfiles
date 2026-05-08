@@ -20,7 +20,6 @@ packages=(
   gh
   git
   git-delta
-  mise
   ripgrep
   shellcheck
   vim
