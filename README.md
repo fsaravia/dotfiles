@@ -10,16 +10,16 @@ A small Apple Silicon macOS setup with:
 
 ## Quick start
 
-Link the dotfiles:
-
-```bash
-./bootstrap
-```
-
 Install packages:
 
 ```bash
 ./install-packages
+```
+
+Link the dotfiles:
+
+```bash
+./bootstrap
 ```
 
 Apply macOS defaults:

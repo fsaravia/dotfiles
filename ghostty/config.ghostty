@@ -8,7 +8,7 @@ macos-titlebar-style = tabs
 macos-option-as-alt = true
 
 shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
-clipboard-read = allow
+clipboard-read = ask
 clipboard-write = allow
 copy-on-select = clipboard
 confirm-close-surface = false
