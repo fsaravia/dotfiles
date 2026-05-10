@@ -11,3 +11,5 @@ Desktop.ini
 *.swp
 *.swo
 .direnv/
+mise.local.toml
+.mise.local.toml
