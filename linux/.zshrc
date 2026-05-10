@@ -3,6 +3,10 @@ export EDITOR="${EDITOR:-vim}"
 export VISUAL="$EDITOR"
 export PAGER="${PAGER:-less}"
 
+if [[ -t 0 ]]; then
+  export GPG_TTY="$(tty)"
+fi
+
 # Keep PATH/fpath deduplicated as we prepend toolchains below.
 typeset -U path fpath
 
@@ -64,11 +68,10 @@ alias ls='eza --group-directories-first --icons=auto'
 alias ll='eza -lah --git --group-directories-first --icons=auto'
 
 alias grep='grep --color=auto'
-alias fetchrebase='git fetch --prune && git rebase origin/$(git branch --show-current)'
+alias fetchrebase='git fetch --prune && git rebase @{u}'
 
 # Linux shell niceties.
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /usr/share/doc/fzf/examples/completion.zsh
 source /usr/share/doc/fzf/examples/key-bindings.zsh
 
@@ -80,3 +83,5 @@ bindkey '^[f' forward-word
 bindkey '^[[1;3C' forward-word
 bindkey '^[b' backward-word
 bindkey '^[[1;3D' backward-word
+
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
