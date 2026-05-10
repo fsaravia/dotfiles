@@ -61,6 +61,27 @@ fi
 echo "Installing Linux packages..."
 "${apt_get[@]}" install -y "${available_packages[@]}"
 
+LOCAL_BIN="$HOME/.local/bin"
+
+link_command_alias() {
+  local name="$1"
+  local target="$2"
+  local target_path
+
+  if command -v "$name" >/dev/null 2>&1; then
+    return
+  fi
+
+  if target_path="$(command -v "$target")"; then
+    mkdir -p "$LOCAL_BIN"
+    ln -sfn "$target_path" "$LOCAL_BIN/$name"
+    printf 'linked %s -> %s\n' "$LOCAL_BIN/$name" "$target_path"
+  fi
+}
+
+link_command_alias bat batcat
+link_command_alias fd fdfind
+
 ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
 
 if command -v docker >/dev/null 2>&1; then
