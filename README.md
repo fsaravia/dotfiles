@@ -1,4 +1,4 @@
-# Dotfiles, 2026 edition
+# Dotfiles
 
 A small Apple Silicon macOS setup with:
 
@@ -37,7 +37,7 @@ Owned Linux hosts can use the Linux profile:
 ./linux/bootstrap
 ```
 
-The Linux package installer targets Debian, Ubuntu, and other apt-based hosts. It warns about package names missing from the host's apt repositories and installs the packages it can find. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
+The Linux package installer targets Debian, Ubuntu, and other apt-based hosts. It warns about package names missing from the host's apt repositories and installs the packages it can find. When Debian package names expose commands as `batcat` or `fdfind`, it creates `~/.local/bin/bat` and `~/.local/bin/fd` aliases if those commands are otherwise missing. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
 
 `linux/bootstrap` also sets zsh as the login shell when root or passwordless sudo is available.
 
@@ -67,7 +67,7 @@ The Linux zsh config assumes Debian/Ubuntu package paths for fzf and zsh plugins
 `Brewfile` includes the core tooling this setup expects:
 
 - `bat`, `eza`, `fd`, `fzf`, `mise`, `ripgrep`, `zoxide`
-- `git`, `gh`
+- `git`, `gh`, `gnupg`
 - `git-delta`
 - `shellcheck`
 - `zsh-autosuggestions`, `zsh-syntax-highlighting`
@@ -87,19 +87,21 @@ shellcheck bootstrap linux/bootstrap install-packages linux/install-packages mac
 
 ## Terminal upgrades
 
-Git diff, show, and patch logs are rendered through `delta`. Use `z <directory hint>` to jump to frequent directories, and `bat <file>` when you want a nicer file read than `cat`.
+On macOS, Git diff, show, and patch logs are rendered through `delta`. Use `z <directory hint>` to jump to frequent directories, and `bat <file>` when you want a nicer file read than `cat`.
 
 Work-laptop Dart and Flutter paths stay supported in [`.zshrc`](.zshrc), but only when `~/.pub-cache/bin` or `~/Development/flutter/bin` exist.
 
-`mise` is installed and activated for project-local tool versions. This repo does not pin global language runtimes; individual projects can use `mise.toml` or `.tool-versions`.
+`mise` is installed and activated on macOS for project-local tool versions. This repo does not pin global language runtimes; individual projects can use `mise.toml` or `.tool-versions`. Local-only mise overrides such as `mise.local.toml` and `.mise.local.toml` are ignored globally.
 
 If Docker is installed, `install-packages` generates zsh completions into `~/.local/share/zsh/site-functions`.
 
 ## Git signing
 
-Commits are signed by default. Keep machine-specific signing keys out of the repo by setting them in `~/.config/git/config.local`:
+The macOS Git config signs commits by default. Keep machine-specific signing keys out of the repo by setting them in `~/.config/git/config.local`:
 
 ```bash
 cp git/config.local.example ~/.config/git/config.local
 git config --file ~/.config/git/config.local user.signingkey <your-gpg-key-fingerprint>
 ```
+
+Both zsh profiles set `GPG_TTY` for terminal-based GPG passphrase prompts. The Linux Git config keeps signing opt-in through `config.local` so server profiles can stay lightweight.

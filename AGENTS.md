@@ -12,7 +12,7 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - `bootstrap` creates symlinks and backs up existing real files into `~/.dotfiles-backups/<timestamp>/`.
 - `install-packages` installs Homebrew if needed, runs `brew bundle`, and generates optional Docker zsh completions when Docker is present.
 - `linux/` contains the Linux profile for owned Debian/Ubuntu-style hosts.
-- `linux/install-packages` installs apt packages and generates optional Docker zsh completions when Docker is present.
+- `linux/install-packages` installs apt packages, creates local `bat`/`fd` command aliases for Debian-style `batcat`/`fdfind` packages when needed, and generates optional Docker zsh completions when Docker is present.
 - `linux/bootstrap` creates Linux symlinks, backs up existing real files into `~/.dotfiles-backups/<timestamp>/`, and sets zsh as the login shell when root or passwordless sudo is available.
 - `macos-defaults.sh` applies opt-in macOS preferences.
 
@@ -21,7 +21,7 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - Prefer boring, readable shell over cleverness.
 - Use Bash for repo scripts and keep `set -euo pipefail`.
 - Keep scripts idempotent where practical.
-- Keep `git/ignore` limited to universal local noise such as OS metadata, temporary editor files, and tool caches. Do not add project files like language configs.
+- Keep `git/ignore` limited to universal local noise such as OS metadata, temporary editor files, tool caches, and local-only tool overrides. Do not add shareable project files like `mise.toml`.
 - Do not introduce a plugin manager for zsh unless explicitly requested.
 - Do not guard commands or files installed by `Brewfile` in shell config. Missing expected tools should fail visibly so the terminal points at what needs installing.
 - The Linux zsh config may assume packages installed by `linux/install-packages`; keep that profile direct unless a dependency is truly optional.
