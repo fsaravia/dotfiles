@@ -59,8 +59,13 @@ precmd() {
   vcs_info
 }
 
+remote_context=''
+if [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]]; then
+  remote_context=$' %F{203}at %m%f'
+fi
+
 # Two-line prompt: context on top, prompt symbol on the bottom.
-PROMPT=$'%F{81}%n%f %F{244}in%f %F{228}%~%f${vcs_info_msg_0_}\n%(?.%F{42}.%F{196})❯%f '
+PROMPT=$'%F{81}%n%f'"${remote_context}"$' %F{244}in%f %F{228}%~%f${vcs_info_msg_0_}\n%(?.%F{42}.%F{196})❯%f '
 RPROMPT='%F{240}%*%f'
 
 # Prefer modern replacements.
