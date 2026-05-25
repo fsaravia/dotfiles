@@ -11,7 +11,7 @@ shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
 clipboard-read = ask
 clipboard-write = allow
 copy-on-select = clipboard
-confirm-close-surface = false
+confirm-close-surface = true
 
 keybind = cmd+shift+left=previous_tab
 keybind = cmd+shift+right=next_tab
