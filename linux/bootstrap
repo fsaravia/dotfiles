@@ -1,12 +1,25 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+umask 077
+
+if [[ "$#" -ne 0 ]]; then
+  printf 'usage: %s\n' "$0"
+  exit 1
+fi
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BACKUP_DIR="$HOME/.dotfiles-backups/$(date +"%Y%m%d-%H%M%S")"
+BACKUP_ROOT="$HOME/.dotfiles-backups"
+BACKUP_DIR="$BACKUP_ROOT/$(date +"%Y%m%d-%H%M%S")"
+MACHINE_GIT_CONFIG="$HOME/.gitconfig"
 
 if [[ "$(uname -s)" != "Linux" ]]; then
   echo "linux/bootstrap only supports Linux"
+  exit 1
+fi
+
+if [[ -n "${SUDO_USER:-}" ]]; then
+  echo "linux/bootstrap must be run directly, not through sudo"
   exit 1
 fi
 
@@ -17,49 +30,154 @@ links=(
   "$ROOT_DIR/.vimrc:$HOME/.vimrc"
 )
 
+backup_required=false
+
+for entry in "${links[@]}"; do
+  source_path="${entry%%:*}"
+  destination="${entry#*:}"
+
+  if [[ ! -e "$source_path" ]]; then
+    printf 'required source is missing: %s\n' "$source_path"
+    exit 1
+  fi
+
+  if [[ -e "$destination" && ! -L "$destination" && ! -f "$destination" && ! -d "$destination" ]]; then
+    printf 'unsupported destination type: %s\n' "$destination"
+    exit 1
+  fi
+
+  destination_parent="$(dirname "$destination")"
+
+  while [[ ! -e "$destination_parent" && ! -L "$destination_parent" ]]; do
+    destination_parent="$(dirname "$destination_parent")"
+  done
+
+  if [[ ! -d "$destination_parent" || ! -w "$destination_parent" ]]; then
+    printf 'destination parent is not a writable directory: %s\n' "$destination_parent"
+    exit 1
+  fi
+
+  if [[ -L "$destination" ]]; then
+    if [[ "$(readlink "$destination")" != "$source_path" ]]; then
+      backup_required=true
+    fi
+  elif [[ -e "$destination" ]]; then
+    backup_required=true
+  fi
+done
+
+if [[ -L "$BACKUP_ROOT" || (-e "$BACKUP_ROOT" && ! -d "$BACKUP_ROOT") ]]; then
+  printf '%s must be a regular directory, not a symlink or special file\n' "$BACKUP_ROOT"
+  exit 1
+fi
+
+if [[ -d "$BACKUP_ROOT" && ! -w "$BACKUP_ROOT" ]]; then
+  printf 'backup directory is not writable: %s\n' "$BACKUP_ROOT"
+  exit 1
+fi
+
+if [[ -d "$BACKUP_ROOT" && ! -O "$BACKUP_ROOT" ]]; then
+  printf 'backup directory must be owned by the current user: %s\n' "$BACKUP_ROOT"
+  exit 1
+fi
+
+if [[ "$backup_required" == true && (-e "$BACKUP_DIR" || -L "$BACKUP_DIR") ]]; then
+  printf 'backup destination already exists: %s\n' "$BACKUP_DIR"
+  exit 1
+fi
+
+if [[ -L "$MACHINE_GIT_CONFIG" || (-e "$MACHINE_GIT_CONFIG" && ! -f "$MACHINE_GIT_CONFIG") ]]; then
+  printf '%s must be a regular file, not a symlink or special file\n' "$MACHINE_GIT_CONFIG"
+  exit 1
+fi
+
+if ! zsh_path="$(command -v zsh)"; then
+  echo "linux/bootstrap requires zsh"
+  exit 1
+fi
+
+user_name="$(id -un)"
+
+if ! passwd_entry="$(getent passwd "$user_name")"; then
+  printf 'could not read the passwd entry for %s\n' "$user_name"
+  exit 1
+fi
+
+current_shell="${passwd_entry##*:}"
+
+if [[ "$current_shell" != "$zsh_path" ]]; then
+  if ! command -v chsh >/dev/null 2>&1; then
+    echo "linux/bootstrap requires chsh to set the login shell"
+    exit 1
+  fi
+
+  if [[ ! -t 0 ]]; then
+    echo "linux/bootstrap requires an interactive terminal to set the login shell"
+    exit 1
+  fi
+
+  if [[ ! -r /etc/shells ]] || ! grep -Fxq "$zsh_path" /etc/shells; then
+    printf '%s is not registered in /etc/shells\n' "$zsh_path"
+    exit 1
+  fi
+fi
+
 backup_path() {
   local destination="$1"
+  local relative_path="${destination#"$HOME"/}"
+  local backup_destination="$BACKUP_DIR/$relative_path"
 
-  mkdir -p "$BACKUP_DIR"
-  mv "$destination" "$BACKUP_DIR/$(basename "$destination")"
-  printf 'backed up %s to %s\n' "$destination" "$BACKUP_DIR"
+  mkdir -p "$(dirname "$backup_destination")"
+  mv "$destination" "$backup_destination"
+  printf 'backed up %s to %s\n' "$destination" "$backup_destination"
 }
 
 link_path() {
   local source="$1"
   local destination="$2"
+  local current_target
 
   mkdir -p "$(dirname "$destination")"
 
-  if [[ -e "$destination" && ! -L "$destination" ]]; then
+  if [[ -L "$destination" ]]; then
+    current_target="$(readlink "$destination")"
+
+    if [[ "$current_target" == "$source" ]]; then
+      printf 'already linked %s -> %s\n' "$destination" "$source"
+      return
+    fi
+
+    backup_path "$destination"
+  elif [[ -e "$destination" ]]; then
     backup_path "$destination"
   fi
 
-  ln -sfn "$source" "$destination"
+  ln -s "$source" "$destination"
   printf 'linked %s -> %s\n' "$destination" "$source"
 }
+
+if [[ "$backup_required" == true ]]; then
+  if [[ -d "$BACKUP_ROOT" ]]; then
+    chmod 700 "$BACKUP_ROOT"
+  else
+    mkdir -m 700 "$BACKUP_ROOT"
+  fi
+
+  mkdir -m 700 "$BACKUP_DIR"
+fi
+
+if [[ -f "$MACHINE_GIT_CONFIG" ]]; then
+  chmod 600 "$MACHINE_GIT_CONFIG"
+else
+  install -m 600 /dev/null "$MACHINE_GIT_CONFIG"
+fi
 
 for entry in "${links[@]}"; do
   link_path "${entry%%:*}" "${entry#*:}"
 done
 
-if ! zsh_path="$(command -v zsh)"; then
-  echo "warning: could not set zsh as the login shell; zsh is not installed"
-  exit 0
-fi
-
-user_name="$(id -un)"
-current_shell="$(getent passwd "$user_name" | cut -d: -f7)"
-
 if [[ "$current_shell" != "$zsh_path" ]]; then
-  if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
-    usermod --shell "$zsh_path" "$user_name"
-  elif sudo -n true 2>/dev/null; then
-    sudo -n usermod --shell "$zsh_path" "$user_name"
-  else
-    echo "warning: could not set zsh as the login shell; root or passwordless sudo is required"
-    exit 0
-  fi
+  chsh -s "$zsh_path"
 
   printf 'set login shell for %s to %s\n' "$user_name" "$zsh_path"
 fi

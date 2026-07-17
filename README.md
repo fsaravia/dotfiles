@@ -22,6 +22,8 @@ Link the dotfiles:
 ./bootstrap
 ```
 
+Run both commands directly as a regular user, without `sudo`. The macOS setup supports Apple Silicon only, and `bootstrap` validates the platform and execution user before changing any files.
+
 Apply macOS defaults:
 
 ```bash
@@ -39,17 +41,22 @@ Owned Linux hosts can use the Linux profile:
 
 The Linux package installer targets Debian, Ubuntu, and other apt-based hosts. It warns about package names missing from the host's apt repositories and installs the packages it can find. When Debian package names expose commands as `batcat` or `fdfind`, it creates `~/.local/bin/bat` and `~/.local/bin/fd` aliases if those commands are otherwise missing. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
 
-`linux/bootstrap` also sets zsh as the login shell when root or passwordless sudo is available.
+Run `linux/bootstrap` directly, never through `sudo`. Genuine root sessions are supported. If the current user's login shell is not zsh, the bootstrap requires an interactive terminal and invokes the user's `chsh` directly; failure to change the shell stops the setup.
 
 ## What gets linked
 
 - `~/.config/git/config`
 - `~/.config/git/ignore`
+- `~/.zprofile`
 - `~/.zshrc`
 - `~/.vimrc`
 - `~/.config/ghostty`
 
-If a destination already exists as a real file or directory, `bootstrap` moves it into `~/.dotfiles-backups/<timestamp>/` before linking.
+The macOS `.zprofile` initializes Homebrew from `/opt/homebrew` for login shells. Homebrew and the shell tools managed by `Brewfile` are required; the startup files do not hide missing installations.
+
+If a destination already exists as a real file or directory, or as a wrong or dangling symlink, `bootstrap` moves it into a private `~/.dotfiles-backups/<timestamp>/` tree while preserving its path below `HOME`. A symlink already pointing to the expected tracked file is left untouched. Both bootstraps validate their arguments, platform, execution context, sources, destinations, backup root, machine-local Git config, and login-shell requirements before creating links.
+
+Both bootstraps also ensure that `~/.gitconfig` is a mode-`0600` regular file, never a symlink. This private file is reserved for `user.signingkey`; the tracked Git defaults remain linked at `~/.config/git/config`. A missing `~/.gitconfig` is created empty so setup never guesses a signing identity.
 
 `linux/bootstrap` links:
 
@@ -58,7 +65,7 @@ If a destination already exists as a real file or directory, `bootstrap` moves i
 - `~/.zshrc`
 - `~/.vimrc`
 
-Linux uses [`linux/git/config`](linux/git/config), which keeps shared Git defaults but leaves workstation-specific signing and `delta` configuration out of the base server profile.
+Linux uses [`linux/git/config`](linux/git/config), which keeps the shared Git defaults and mandatory commit signing but omits the macOS-only `delta` integration.
 
 The Linux zsh config assumes Debian/Ubuntu package paths for fzf and zsh plugins under `/usr/share`.
 
@@ -79,6 +86,7 @@ The Linux zsh config assumes Debian/Ubuntu package paths for fzf and zsh plugins
 Check shell config and scripts with:
 
 ```bash
+zsh -n .zprofile
 zsh -n .zshrc
 zsh -n linux/.zshrc
 bash -n bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh
@@ -97,11 +105,13 @@ If Docker is installed, `install-packages` generates zsh completions into `~/.lo
 
 ## Git signing
 
-The macOS Git config signs commits by default. Keep machine-specific signing keys out of the repo by setting them in `~/.config/git/config.local`:
+Both Git profiles require GPG-signed commits. After bootstrap, set the full fingerprint in the private machine-local Git config, then make sure the local GnuPG keyring contains that secret key:
 
 ```bash
-cp git/config.local.example ~/.config/git/config.local
-git config --file ~/.config/git/config.local user.signingkey <your-gpg-key-fingerprint>
+git config set --global user.signingkey <full-gpg-fingerprint>
+gpg --list-secret-keys <full-gpg-fingerprint>
 ```
 
-Both zsh profiles set `GPG_TTY` for terminal-based GPG passphrase prompts. The Linux Git config keeps signing opt-in through `config.local` so server profiles can stay lightweight.
+`~/.gitconfig` may contain only `user.signingkey`; all shareable Git behavior belongs in the tracked platform config. Both zsh profiles set `GPG_TTY` for terminal-based passphrase prompts. Missing GnuPG or signing-key configuration is intentionally fatal: Git does not fall back to unsigned commits.
+
+Both Git configs automatically establish the upstream on the first default push. Use `git sw <branch>` for branch switching and `git f` for fetching; pruning is already enabled globally.

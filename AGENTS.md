@@ -4,16 +4,17 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 
 ## Repo Shape
 
-- `.zshrc` is the main interactive shell config.
-- `git/config` is linked to `~/.config/git/config`, Git's default XDG config path.
+- `.zprofile` initializes Homebrew for macOS login shells; `.zshrc` is the main interactive shell config.
+- `git/config` is linked to `~/.config/git/config`, Git's tracked XDG config path.
 - `git/ignore` is linked to `~/.config/git/ignore`, Git's default global ignore path.
+- `~/.gitconfig` remains a machine-local mode-`0600` regular file reserved for `user.signingkey`; bootstraps create it empty when absent and never symlink it.
 - `ghostty/` is linked to `~/.config/ghostty`.
 - `Brewfile` is the source of truth for Homebrew packages expected by the shell.
-- `bootstrap` creates symlinks and backs up existing real files into `~/.dotfiles-backups/<timestamp>/`.
+- `bootstrap` supports Apple Silicon macOS, rejects root and sudo-wrapped execution, creates symlinks, and preserves replaced paths in a private `~/.dotfiles-backups/<timestamp>/` tree.
 - `install-packages` installs Homebrew if needed, runs `brew bundle`, and generates optional Docker zsh completions when Docker is present.
 - `linux/` contains the Linux profile for owned Debian/Ubuntu-style hosts.
 - `linux/install-packages` installs apt packages, creates local `bat`/`fd` command aliases for Debian-style `batcat`/`fdfind` packages when needed, and generates optional Docker zsh completions when Docker is present.
-- `linux/bootstrap` creates Linux symlinks, backs up existing real files into `~/.dotfiles-backups/<timestamp>/`, and sets zsh as the login shell when root or passwordless sudo is available.
+- `linux/bootstrap` rejects sudo-wrapped execution, creates Linux symlinks, preserves replaced paths in a private backup tree, and uses the current user's `chsh` directly when the login shell must change.
 - `macos-defaults.sh` applies opt-in macOS preferences.
 
 ## Editing Principles
@@ -24,16 +25,18 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - Keep `git/ignore` limited to universal local noise such as OS metadata, temporary editor files, tool caches, and local-only tool overrides. Do not add shareable project files like `mise.toml`.
 - Do not introduce a plugin manager for zsh unless explicitly requested.
 - Do not guard commands or files installed by `Brewfile` in shell config. Missing expected tools should fail visibly so the terminal points at what needs installing.
+- Keep `/opt/homebrew/bin/brew shellenv` in `.zprofile` as the sole Homebrew initialization; it is intentionally unguarded.
 - The Linux zsh config may assume packages installed by `linux/install-packages`; keep that profile direct unless a dependency is truly optional.
 - It is fine to guard truly optional integrations, such as Docker completions or work-laptop Dart/Flutter paths.
-- Keep machine-specific or secret values out of the repo. Use `~/.config/git/config.local` for local Git signing keys.
+- Keep machine-specific or secret values out of the repo. `~/.gitconfig` is a mode-`0600` regular file reserved for the machine's `user.signingkey`; do not add signing-key identifiers to the tracked configs.
 - `.zshrc` and `linux/.zshrc` intentionally duplicate common shell behavior. When editing one, check whether the same practical behavior should carry to the other, while preserving OS-specific differences.
-- `git/config` and `linux/git/config` intentionally differ around workstation-specific settings such as signing and `delta`. When editing shared aliases or general Git behavior, consider updating both.
+- `git/config` and `linux/git/config` intentionally differ around macOS-only `delta` integration. Keep shared aliases, push behavior, conflict handling, and mandatory commit signing aligned.
 
 ## Validation
 
 Run the lightest relevant checks after edits:
 
+- `.zprofile`: `zsh -n .zprofile`
 - `.zshrc`: `zsh -n .zshrc`
 - `linux/.zshrc`: `zsh -n linux/.zshrc`
 - Bash scripts: `bash -n bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh`
