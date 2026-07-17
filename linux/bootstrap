@@ -12,6 +12,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKUP_ROOT="$HOME/.dotfiles-backups"
 BACKUP_DIR="$BACKUP_ROOT/$(date +"%Y%m%d-%H%M%S")"
 MACHINE_GIT_CONFIG="$HOME/.gitconfig"
+GIT_BIN="/usr/bin/git"
+ZSH_BIN="/usr/bin/zsh"
+CHSH_BIN="/usr/bin/chsh"
+MISSING_SIGNING_KEY="0000000000000000000000000000000000000000!"
 
 if [[ "$(uname -s)" != "Linux" ]]; then
   echo "linux/bootstrap only supports Linux"
@@ -20,6 +24,27 @@ fi
 
 if [[ -n "${SUDO_USER:-}" ]]; then
   echo "linux/bootstrap must be run directly, not through sudo"
+  exit 1
+fi
+
+if [[ ! -r /etc/os-release ]]; then
+  echo "linux/bootstrap requires /etc/os-release"
+  exit 1
+fi
+
+# shellcheck source=/dev/null
+source /etc/os-release
+
+case "${ID:-}:${VERSION_ID:-}" in
+  debian:13 | ubuntu:24.04 | ubuntu:26.04) ;;
+  *)
+    echo "linux/bootstrap supports Debian 13 and Ubuntu 24.04 or 26.04"
+    exit 1
+    ;;
+esac
+
+if ! LC_ALL=C.UTF-8 /usr/bin/locale charmap >/dev/null 2>&1; then
+  echo "linux/bootstrap requires the C.UTF-8 locale"
   exit 1
 fi
 
@@ -91,8 +116,43 @@ if [[ -L "$MACHINE_GIT_CONFIG" || (-e "$MACHINE_GIT_CONFIG" && ! -f "$MACHINE_GI
   exit 1
 fi
 
-if ! zsh_path="$(command -v zsh)"; then
-  echo "linux/bootstrap requires zsh"
+if [[ -f "$MACHINE_GIT_CONFIG" && ! -O "$MACHINE_GIT_CONFIG" ]]; then
+  printf '%s must be owned by the current user\n' "$MACHINE_GIT_CONFIG"
+  exit 1
+fi
+
+if [[ ! -x "$GIT_BIN" ]]; then
+  printf 'linux/bootstrap requires %s\n' "$GIT_BIN"
+  exit 1
+fi
+
+if [[ -f "$MACHINE_GIT_CONFIG" ]]; then
+  if ! machine_git_keys="$("$GIT_BIN" config --file "$MACHINE_GIT_CONFIG" --name-only --list)"; then
+    printf 'could not parse %s\n' "$MACHINE_GIT_CONFIG"
+    exit 1
+  fi
+
+  signing_key_count=0
+
+  while IFS= read -r key; do
+    if [[ -n "$key" && "$key" != "user.signingkey" ]]; then
+      printf '%s may contain only user.signingkey\n' "$MACHINE_GIT_CONFIG"
+      exit 1
+    fi
+
+    if [[ "$key" == "user.signingkey" ]]; then
+      ((signing_key_count += 1))
+    fi
+  done <<<"$machine_git_keys"
+
+  if [[ "$signing_key_count" -ne 1 ]] || ! signing_key="$("$GIT_BIN" config --file "$MACHINE_GIT_CONFIG" --get user.signingkey)" || [[ -z "$signing_key" ]]; then
+    printf '%s must contain exactly one nonempty user.signingkey\n' "$MACHINE_GIT_CONFIG"
+    exit 1
+  fi
+fi
+
+if [[ ! -x "$ZSH_BIN" ]]; then
+  printf 'linux/bootstrap requires %s\n' "$ZSH_BIN"
   exit 1
 fi
 
@@ -105,19 +165,14 @@ fi
 
 current_shell="${passwd_entry##*:}"
 
-if [[ "$current_shell" != "$zsh_path" ]]; then
-  if ! command -v chsh >/dev/null 2>&1; then
-    echo "linux/bootstrap requires chsh to set the login shell"
+if [[ "$current_shell" != "$ZSH_BIN" ]]; then
+  if [[ ! -x "$CHSH_BIN" ]]; then
+    printf 'linux/bootstrap requires %s\n' "$CHSH_BIN"
     exit 1
   fi
 
-  if [[ ! -t 0 ]]; then
-    echo "linux/bootstrap requires an interactive terminal to set the login shell"
-    exit 1
-  fi
-
-  if [[ ! -r /etc/shells ]] || ! grep -Fxq "$zsh_path" /etc/shells; then
-    printf '%s is not registered in /etc/shells\n' "$zsh_path"
+  if [[ ! -r /etc/shells ]] || ! grep -Fxq "$ZSH_BIN" /etc/shells; then
+    printf '%s is not registered in /etc/shells\n' "$ZSH_BIN"
     exit 1
   fi
 fi
@@ -169,15 +224,16 @@ fi
 if [[ -f "$MACHINE_GIT_CONFIG" ]]; then
   chmod 600 "$MACHINE_GIT_CONFIG"
 else
-  install -m 600 /dev/null "$MACHINE_GIT_CONFIG"
+  printf '[user]\n\tsigningkey = %s\n' "$MISSING_SIGNING_KEY" >"$MACHINE_GIT_CONFIG"
+  chmod 600 "$MACHINE_GIT_CONFIG"
 fi
 
 for entry in "${links[@]}"; do
   link_path "${entry%%:*}" "${entry#*:}"
 done
 
-if [[ "$current_shell" != "$zsh_path" ]]; then
-  chsh -s "$zsh_path"
+if [[ "$current_shell" != "$ZSH_BIN" ]]; then
+  "$CHSH_BIN" -s "$ZSH_BIN"
 
-  printf 'set login shell for %s to %s\n' "$user_name" "$zsh_path"
+  printf 'set login shell for %s to %s\n' "$user_name" "$ZSH_BIN"
 fi

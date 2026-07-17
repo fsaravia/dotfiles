@@ -37,21 +37,20 @@ setopt share_history
 WORDCHARS="${WORDCHARS//\/}"
 WORDCHARS="${WORDCHARS//-}"
 
-mkdir -p "$HOME/.local/state/zsh"
+[[ -d "$HOME/.local/state/zsh" ]] || mkdir -p "$HOME/.local/state/zsh"
 export HISTFILE="$HOME/.local/state/zsh/history"
 export HISTSIZE=50000
 export SAVEHIST=50000
 
 # Completion and prompt helpers.
-autoload -Uz add-zsh-hook colors compinit vcs_info
+autoload -Uz add-zsh-hook compinit vcs_info
 zmodload zsh/complist
-colors
 
 if [[ -d "$HOME/.local/share/zsh/site-functions" ]]; then
   fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
 fi
 
-mkdir -p "$HOME/.cache/zsh"
+[[ -d "$HOME/.cache/zsh" ]] || mkdir -p "$HOME/.cache/zsh"
 compinit -d "$HOME/.cache/zsh/.zcompdump"
 
 zstyle ':completion:*' menu select

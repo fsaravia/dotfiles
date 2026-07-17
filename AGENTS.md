@@ -7,16 +7,16 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - `.zprofile` initializes Homebrew for macOS login shells; `.zshrc` is the main interactive shell config.
 - `git/config` is linked to `~/.config/git/config`, Git's tracked XDG config path.
 - `git/ignore` is linked to `~/.config/git/ignore`, Git's default global ignore path.
-- `~/.gitconfig` remains a machine-local mode-`0600` regular file reserved for `user.signingkey`; bootstraps create it empty when absent and never symlink it.
+- `~/.gitconfig` is a machine-local mode-`0600` regular file containing only one nonempty `user.signingkey`; bootstraps create it with an invalid fail-fast fingerprint when absent and never symlink it.
 - `ghostty/` is linked to `~/.config/ghostty`.
 - `Brewfile` is the source of truth for Homebrew packages expected by the shell.
-- `bootstrap` supports Apple Silicon macOS, rejects root and sudo-wrapped execution, creates symlinks, and preserves replaced paths in a private `~/.dotfiles-backups/<timestamp>/` tree.
-- `install-packages` supports Apple Silicon macOS, installs Homebrew from a fully downloaded installer when needed, runs `brew bundle --jobs auto`, and requires valid Docker zsh completions when Docker Desktop is installed.
+- `bootstrap` supports only Apple Silicon macOS 26, rejects root and sudo-wrapped execution, creates symlinks, and preserves replaced paths in a private `~/.dotfiles-backups/<timestamp>/` tree.
+- `install-packages` supports only Apple Silicon macOS 26, installs Homebrew from a fully downloaded installer when needed, runs `brew bundle install --jobs auto`, and requires valid Docker zsh completions when Docker Desktop is installed.
 - `linux/` contains the Linux profile for owned Debian/Ubuntu-style hosts.
-- `linux/bootstrap` rejects sudo-wrapped execution, creates Linux symlinks, preserves replaced paths in a private backup tree, and uses the current user's `chsh` directly when the login shell must change.
+- `linux/bootstrap` supports Debian 13 and Ubuntu 24.04 or 26.04, rejects sudo-wrapped execution, requires `/usr/bin/zsh`, creates Linux symlinks, preserves replaced paths in a private backup tree, and uses the current user's `chsh` directly when the login shell must change.
 - `linux/install-packages` supports Debian 13 and Ubuntu 24.04 or 26.04, requires its full apt package set, creates canonical local `bat`/`fd` links, asserts the shell plugin paths, and requires valid Docker zsh completions when Docker is present.
 - `macos-defaults.sh` checks or applies the opt-in macOS 26 preferences.
-- `check` runs syntax, formatting, Git, Vim, whitespace, and macOS Ghostty validation.
+- `check` runs Bash and zsh syntax, Bash formatting, ShellCheck, Git, Vim, whitespace, and macOS Ghostty validation.
 
 ## Editing Principles
 
@@ -30,6 +30,7 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - The Linux zsh config may assume packages installed by `linux/install-packages`; keep that profile direct unless a dependency is truly optional.
 - It is fine to guard truly optional integrations, such as Docker completions or work-laptop Dart/Flutter paths.
 - Keep machine-specific or secret values out of the repo. `~/.gitconfig` is a mode-`0600` regular file reserved for the machine's `user.signingkey`; do not add signing-key identifiers to the tracked configs.
+- Never read or migrate `~/.config/git/config.local` at runtime. Migration belongs in README and PR guidance.
 - `.zshrc` and `linux/.zshrc` intentionally duplicate common shell behavior. When editing one, check whether the same practical behavior should carry to the other, while preserving OS-specific differences.
 - `git/config` and `linux/git/config` intentionally differ around macOS-only `delta` integration. Keep shared aliases, push behavior, conflict handling, and mandatory commit signing aligned.
 
@@ -37,6 +38,7 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 
 - `Brewfile` is the complete Apple Silicon macOS package set. The shell expects those commands and plugin files to exist after `install-packages` succeeds.
 - `linux/install-packages` has one required package set for Debian 13 and Ubuntu 24.04 or 26.04. Missing apt packages are fatal; do not restore partial installation behavior.
+- Use `shfmt` for the Bash scripts only. Debian 13 and Ubuntu 24.04/26.04 package versions predate Zsh support, so Zsh uses `zsh -n` without a formatter version branch.
 - Linux uses the distribution commands at `/usr/bin/batcat` and `/usr/bin/fdfind` through canonical links in `~/.local/bin`.
 - Docker is optional. When Docker Desktop or `/usr/bin/docker` is present, completion generation is required to succeed and must replace `_docker` atomically.
 

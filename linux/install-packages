@@ -33,6 +33,10 @@ case "${ID:-}:${VERSION_ID:-}" in
     ;;
 esac
 
+if ! LC_ALL=C.UTF-8 /usr/bin/locale charmap >/dev/null 2>&1; then
+  die "linux/install-packages requires the C.UTF-8 locale"
+fi
+
 if ! command -v apt-get >/dev/null 2>&1; then
   die "apt-get is required"
 fi
@@ -63,6 +67,21 @@ packages=(
 
 LOCAL_BIN="$HOME/.local/bin"
 DOCKER_BIN="/usr/bin/docker"
+ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
+DOCKER_COMPLETION="$ZSH_SITE_FUNCTIONS/_docker"
+
+validate_directory_destination() {
+  local directory="$1"
+  local existing_path="$directory"
+
+  while [[ ! -e "$existing_path" && ! -L "$existing_path" ]]; do
+    existing_path="$(dirname "$existing_path")"
+  done
+
+  if [[ -L "$existing_path" || ! -d "$existing_path" || ! -w "$existing_path" ]]; then
+    die "directory path must resolve through writable regular directories: $directory"
+  fi
+}
 
 validate_command_alias() {
   local link_path="$1"
@@ -75,10 +94,6 @@ validate_command_alias() {
     if [[ "$actual_target" != "$expected_target" ]]; then
       die "command alias must point exactly to $expected_target: $link_path"
     fi
-
-    if [[ ! -e "$link_path" ]]; then
-      die "command alias is dangling: $link_path"
-    fi
   elif [[ -e "$link_path" ]]; then
     die "command alias must be absent or a canonical symlink: $link_path"
   fi
@@ -86,13 +101,22 @@ validate_command_alias() {
 
 validate_command_alias "$LOCAL_BIN/bat" /usr/bin/batcat
 validate_command_alias "$LOCAL_BIN/fd" /usr/bin/fdfind
+validate_directory_destination "$LOCAL_BIN"
 
 if [[ -L "$DOCKER_BIN" && ! -e "$DOCKER_BIN" ]]; then
   die "Docker command is dangling: $DOCKER_BIN"
 fi
 
-if [[ -e "$DOCKER_BIN" && ! -x "$DOCKER_BIN" ]]; then
-  die "Docker command is not executable: $DOCKER_BIN"
+if [[ -e "$DOCKER_BIN" && (! -f "$DOCKER_BIN" || ! -x "$DOCKER_BIN") ]]; then
+  die "Docker command is not an executable file: $DOCKER_BIN"
+fi
+
+if [[ -x "$DOCKER_BIN" ]]; then
+  validate_directory_destination "$ZSH_SITE_FUNCTIONS"
+
+  if [[ -L "$DOCKER_COMPLETION" || (-e "$DOCKER_COMPLETION" && ! -f "$DOCKER_COMPLETION") ]]; then
+    die "Docker completion must be absent or a regular file: $DOCKER_COMPLETION"
+  fi
 fi
 
 apt_get=(apt-get)
@@ -158,8 +182,6 @@ for shell_file in "${required_shell_files[@]}"; do
   fi
 done
 
-ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
-
 if [[ -x "$DOCKER_BIN" ]]; then
   echo "Installing Docker zsh completions..."
   mkdir -p "$ZSH_SITE_FUNCTIONS"
@@ -175,7 +197,7 @@ if [[ -x "$DOCKER_BIN" ]]; then
   fi
 
   chmod 0644 "$completion_file"
-  mv -f "$completion_file" "$ZSH_SITE_FUNCTIONS/_docker"
+  mv -f "$completion_file" "$DOCKER_COMPLETION"
   completion_file=""
   trap - EXIT
 fi

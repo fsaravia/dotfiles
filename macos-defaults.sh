@@ -54,6 +54,9 @@ apply_default() {
   local expected_type
   local current="<missing>"
   local current_type="missing"
+  local domain_plist
+  local read_type_status=0
+  local plist_type_status=0
 
   case "$type" in
     bool)
@@ -76,10 +79,40 @@ apply_default() {
       ;;
   esac
 
-  if ! current_type="$(defaults read-type "$domain" "$key" 2>/dev/null)" \
-    || ! current="$(defaults read "$domain" "$key" 2>/dev/null)"; then
-    current="<missing>"
-    current_type="missing"
+  current_type="$(defaults read-type "$domain" "$key" 2>/dev/null)" || read_type_status=$?
+
+  if [[ "$read_type_status" -eq 0 ]]; then
+    current="$(defaults read "$domain" "$key")"
+  elif [[ "$read_type_status" -eq 1 ]]; then
+    if ! domain_plist="$(defaults export "$domain" -)"; then
+      printf 'could not inspect defaults domain: %s\n' "$domain" >&2
+      exit 1
+    fi
+
+    if ! /usr/bin/plutil -lint - >/dev/null <<<"$domain_plist"; then
+      printf 'defaults domain is not a valid property list: %s\n' "$domain" >&2
+      exit 1
+    fi
+
+    /usr/bin/plutil -type "$key" - >/dev/null 2>&1 <<<"$domain_plist" || plist_type_status=$?
+
+    case "$plist_type_status" in
+      0)
+        printf 'defaults read-type failed for an existing key: %s %s\n' "$domain" "$key" >&2
+        exit 1
+        ;;
+      1)
+        current="<missing>"
+        current_type="missing"
+        ;;
+      *)
+        printf 'could not inspect defaults key: %s %s\n' "$domain" "$key" >&2
+        exit 1
+        ;;
+    esac
+  else
+    printf 'could not read defaults type: %s %s\n' "$domain" "$key" >&2
+    exit "$read_type_status"
   fi
 
   if [[ "$current_type" == "$expected_type" && "$current" == "$expected" ]]; then
@@ -102,6 +135,22 @@ apply_default() {
       ;;
     Dock)
       dock_changed=1
+      ;;
+  esac
+}
+
+restart_if_running() {
+  local process_name="$1"
+  local pgrep_status=0
+
+  pgrep -x "$process_name" >/dev/null || pgrep_status=$?
+
+  case "$pgrep_status" in
+    0) killall "$process_name" ;;
+    1) ;;
+    *)
+      printf 'could not determine whether %s is running\n' "$process_name" >&2
+      exit "$pgrep_status"
       ;;
   esac
 }
@@ -142,12 +191,12 @@ if [[ "$mode" == "check" ]]; then
   exit 0
 fi
 
-if [[ "$finder_changed" -eq 1 ]] && pgrep -x Finder >/dev/null; then
-  killall Finder
+if [[ "$finder_changed" -eq 1 ]]; then
+  restart_if_running Finder
 fi
 
-if [[ "$dock_changed" -eq 1 ]] && pgrep -x Dock >/dev/null; then
-  killall Dock
+if [[ "$dock_changed" -eq 1 ]]; then
+  restart_if_running Dock
 fi
 
 if [[ "$drift" -eq 0 ]]; then

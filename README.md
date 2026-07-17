@@ -31,6 +31,8 @@ Optionally check or apply the macOS 26 defaults:
 ./macos-defaults.sh
 ```
 
+Most managed Finder, Dock, and global preference keys are private macOS implementation details. They are validated against macOS 26 rather than treated as stable public APIs.
+
 ## Linux hosts
 
 Owned Linux hosts can use the Linux profile:
@@ -40,9 +42,9 @@ Owned Linux hosts can use the Linux profile:
 ./linux/bootstrap
 ```
 
-The Linux package installer supports Debian 13 and Ubuntu 24.04 or 26.04. Run it as the target user; it validates the distribution, authenticates with `sudo`, and requires the complete package set before installing anything. It links `~/.local/bin/bat` and `~/.local/bin/fd` to the canonical Debian-family commands at `/usr/bin/batcat` and `/usr/bin/fdfind`. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
+The Linux package installer supports Debian 13 and Ubuntu 24.04 or 26.04. Run it directly, never through `sudo`; normal users authenticate once with `sudo -v`, while genuine root sessions run apt directly. It validates the distribution and complete package set before installing anything. It links `~/.local/bin/bat` and `~/.local/bin/fd` to the canonical Debian-family commands at `/usr/bin/batcat` and `/usr/bin/fdfind`. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
 
-Run `linux/bootstrap` directly, never through `sudo`. Genuine root sessions are supported. If the current user's login shell is not zsh, the bootstrap requires an interactive terminal and invokes the user's `chsh` directly; failure to change the shell stops the setup.
+Run `linux/bootstrap` directly, never through `sudo`. It supports the same three distributions and requires zsh at `/usr/bin/zsh`. If the current user's login shell differs, it invokes `chsh` directly; failure to change the shell stops the setup.
 
 ## What gets linked
 
@@ -57,7 +59,7 @@ The macOS `.zprofile` initializes Homebrew from `/opt/homebrew` for login shells
 
 If a destination already exists as a real file or directory, or as a wrong or dangling symlink, `bootstrap` moves it into a private `~/.dotfiles-backups/<timestamp>/` tree while preserving its path below `HOME`. A symlink already pointing to the expected tracked file is left untouched. Both bootstraps validate their arguments, platform, execution context, sources, destinations, backup root, machine-local Git config, and login-shell requirements before creating links.
 
-Both bootstraps also ensure that `~/.gitconfig` is a mode-`0600` regular file, never a symlink. This private file is reserved for `user.signingkey`; the tracked Git defaults remain linked at `~/.config/git/config`. A missing `~/.gitconfig` is created empty so setup never guesses a signing identity.
+Both bootstraps require `~/.gitconfig` to be a mode-`0600` regular file containing only one nonempty `user.signingkey`; it is never a symlink. The tracked Git defaults remain linked at `~/.config/git/config`. On a new machine, bootstrap creates the private file with an intentionally invalid fingerprint so GnuPG cannot select another secret key automatically.
 
 `linux/bootstrap` links:
 
@@ -72,7 +74,7 @@ The Linux zsh config assumes Debian/Ubuntu package paths for fzf and zsh plugins
 
 ## Packages
 
-The macOS package installer supports Apple Silicon macOS and must be run without `sudo`. `Brewfile` includes the core tooling this setup expects:
+The macOS package installer supports only Apple Silicon macOS 26 and must be run without `sudo`. `Brewfile` includes the core tooling this setup expects:
 
 - `bat`, `eza`, `fd`, `fzf`, `mise`, `ripgrep`, `zoxide`
 - `git`, `gh`, `gnupg`
@@ -81,6 +83,8 @@ The macOS package installer supports Apple Silicon macOS and must be run without
 - `zsh-autosuggestions`, `zsh-syntax-highlighting`
 - `ghostty`
 - `font-jetbrains-mono-nerd-font`
+
+macOS 26 supplies `jq` at `/usr/bin/jq`, so the Brewfile does not install a duplicate copy.
 
 The Linux package set is intentionally explicit:
 
@@ -99,7 +103,7 @@ Run the repository's non-mutating checks with:
 ./check
 ```
 
-This checks Bash and zsh syntax and formatting, runs ShellCheck, parses both Git configs, loads the Vim config, checks changed-line whitespace, and validates the Ghostty config on macOS.
+This checks Bash and zsh syntax, enforces Bash formatting with `shfmt`, runs ShellCheck, parses both Git configs, loads the Vim config, checks tracked-file and diff whitespace, and validates the Ghostty config on macOS. Zsh formatting is deliberately omitted because the supported Debian and Ubuntu releases package pre-3.13 `shfmt`; `zsh -n` remains the single cross-platform Zsh check.
 
 ## Terminal upgrades
 
@@ -113,13 +117,21 @@ When Docker Desktop exists at `/Applications/Docker.app`, the macOS installer re
 
 ## Git signing
 
-Both Git profiles require GPG-signed commits. After bootstrap, set the full fingerprint in the private machine-local Git config, then make sure the local GnuPG keyring contains that secret key:
+Both Git profiles require GPG-signed commits. Existing installations must move the old local config before rerunning bootstrap:
 
 ```bash
-git config set --global user.signingkey <full-gpg-fingerprint>
+mv ~/.config/git/config.local ~/.gitconfig
+chmod 600 ~/.gitconfig
+git config --global user.signingkey <full-gpg-fingerprint>
+```
+
+On a new machine, run bootstrap first, then replace its deliberately invalid fingerprint and verify the secret key:
+
+```bash
+git config --global user.signingkey <full-gpg-fingerprint>
 gpg --list-secret-keys <full-gpg-fingerprint>
 ```
 
-`~/.gitconfig` may contain only `user.signingkey`; all shareable Git behavior belongs in the tracked platform config. Both zsh profiles set `GPG_TTY` for terminal-based passphrase prompts. Missing GnuPG or signing-key configuration is intentionally fatal: Git does not fall back to unsigned commits.
+`~/.gitconfig` may contain only `user.signingkey`; all shareable Git behavior belongs in the tracked platform config. No setup code reads or migrates the old `config.local`. Both zsh profiles set `GPG_TTY` for terminal-based passphrase prompts. A missing or unusable key is intentionally fatal: Git neither discovers another key nor falls back to unsigned commits.
 
 Both Git configs automatically establish the upstream on the first default push. Use `git sw <branch>` for branch switching and `git f` for fetching; pruning is already enabled globally.

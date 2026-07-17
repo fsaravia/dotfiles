@@ -7,6 +7,7 @@ BREW_BIN="/opt/homebrew/bin/brew"
 DOCKER_APP="/Applications/Docker.app"
 DOCKER_BIN="/usr/local/bin/docker"
 ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
+DOCKER_COMPLETION="$ZSH_SITE_FUNCTIONS/_docker"
 
 installer_file=""
 completion_file=""
@@ -26,6 +27,19 @@ cleanup() {
   fi
 }
 
+validate_directory_destination() {
+  local directory="$1"
+  local existing_path="$directory"
+
+  while [[ ! -e "$existing_path" && ! -L "$existing_path" ]]; do
+    existing_path="$(dirname "$existing_path")"
+  done
+
+  if [[ -L "$existing_path" || ! -d "$existing_path" || ! -w "$existing_path" ]]; then
+    die "directory path must resolve through writable regular directories: $directory"
+  fi
+}
+
 trap cleanup EXIT
 
 if [[ "$#" -ne 0 ]]; then
@@ -40,6 +54,16 @@ if [[ "$(uname -m)" != "arm64" ]]; then
   die "install-packages only supports Apple Silicon"
 fi
 
+macos_version="$(sw_vers -productVersion)"
+
+if [[ "${macos_version%%.*}" != "26" ]]; then
+  die "install-packages requires macOS 26; found $macos_version"
+fi
+
+if ! LC_ALL=en_US.UTF-8 /usr/bin/locale charmap >/dev/null 2>&1; then
+  die "install-packages requires the en_US.UTF-8 locale"
+fi
+
 if [[ "$EUID" -eq 0 || -n "${SUDO_USER:-}" ]]; then
   die "run install-packages as the target user, without sudo"
 fi
@@ -48,8 +72,16 @@ if [[ ! -r "$ROOT_DIR/Brewfile" ]]; then
   die "Brewfile is not readable: $ROOT_DIR/Brewfile"
 fi
 
-if [[ -d "$DOCKER_APP" && ! -x "$DOCKER_BIN" ]]; then
-  die "Docker Desktop is installed but $DOCKER_BIN is not executable"
+if [[ -d "$DOCKER_APP" ]]; then
+  if [[ ! -f "$DOCKER_BIN" || ! -x "$DOCKER_BIN" ]]; then
+    die "Docker Desktop is installed but $DOCKER_BIN is not an executable file"
+  fi
+
+  validate_directory_destination "$ZSH_SITE_FUNCTIONS"
+
+  if [[ -L "$DOCKER_COMPLETION" || (-e "$DOCKER_COMPLETION" && ! -f "$DOCKER_COMPLETION") ]]; then
+    die "Docker completion must be absent or a regular file: $DOCKER_COMPLETION"
+  fi
 fi
 
 if [[ ! -x "$BREW_BIN" ]]; then
@@ -89,6 +121,6 @@ if [[ -d "$DOCKER_APP" ]]; then
   fi
 
   chmod 0644 "$completion_file"
-  mv -f "$completion_file" "$ZSH_SITE_FUNCTIONS/_docker"
+  mv -f "$completion_file" "$DOCKER_COMPLETION"
   completion_file=""
 fi

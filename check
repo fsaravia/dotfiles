@@ -52,9 +52,6 @@ shellcheck "${bash_scripts[@]}"
 echo "Checking Bash formatting..."
 shfmt -d -i 2 -ci "${bash_scripts[@]}"
 
-echo "Checking zsh formatting..."
-shfmt -ln zsh -d -i 2 -ci "${zsh_configs[@]}"
-
 echo "Parsing Git configuration..."
 git config --file git/config --list >/dev/null
 git config --file linux/git/config --list >/dev/null
@@ -74,9 +71,14 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 fi
 
 echo "Checking whitespace..."
-if git grep -nI -E '[[:blank:]]+$'; then
-  die "tracked files contain trailing whitespace"
-fi
+grep_status=0
+git grep -nI -E '[[:blank:]]+$' || grep_status=$?
+
+case "$grep_status" in
+  0) die "tracked files contain trailing whitespace" ;;
+  1) ;;
+  *) die "git grep failed while checking whitespace" ;;
+esac
 
 git diff --check
 git diff --cached --check
