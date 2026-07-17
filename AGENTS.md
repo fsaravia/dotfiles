@@ -15,7 +15,7 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - `linux/` contains the Linux profile for owned Debian/Ubuntu-style hosts.
 - `linux/bootstrap` rejects sudo-wrapped execution, creates Linux symlinks, preserves replaced paths in a private backup tree, and uses the current user's `chsh` directly when the login shell must change.
 - `linux/install-packages` supports Debian 13 and Ubuntu 24.04 or 26.04, requires its full apt package set, creates canonical local `bat`/`fd` links, asserts the shell plugin paths, and requires valid Docker zsh completions when Docker is present.
-- `macos-defaults.sh` applies opt-in macOS preferences.
+- `macos-defaults.sh` checks or applies the opt-in macOS 26 preferences.
 - `check` runs syntax, formatting, Git, Vim, whitespace, and macOS Ghostty validation.
 
 ## Editing Principles

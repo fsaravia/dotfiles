@@ -22,11 +22,12 @@ Link the dotfiles:
 ./bootstrap
 ```
 
-Run both commands directly as a regular user, without `sudo`. The macOS setup supports Apple Silicon only, and `bootstrap` validates the platform and execution user before changing any files.
+Run both commands directly as a regular user, without `sudo`. The setup supports only Apple Silicon macOS 26 and validates the platform and execution user before changing any files.
 
-Apply macOS defaults:
+Optionally check or apply the macOS 26 defaults:
 
 ```bash
+./macos-defaults.sh --check
 ./macos-defaults.sh
 ```
 
