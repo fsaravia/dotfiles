@@ -39,7 +39,7 @@ Owned Linux hosts can use the Linux profile:
 ./linux/bootstrap
 ```
 
-The Linux package installer targets Debian, Ubuntu, and other apt-based hosts. It warns about package names missing from the host's apt repositories and installs the packages it can find. When Debian package names expose commands as `batcat` or `fdfind`, it creates `~/.local/bin/bat` and `~/.local/bin/fd` aliases if those commands are otherwise missing. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
+The Linux package installer supports Debian 13 and Ubuntu 24.04 or 26.04. Run it as the target user; it validates the distribution, authenticates with `sudo`, and requires the complete package set before installing anything. It links `~/.local/bin/bat` and `~/.local/bin/fd` to the canonical Debian-family commands at `/usr/bin/batcat` and `/usr/bin/fdfind`. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
 
 Run `linux/bootstrap` directly, never through `sudo`. Genuine root sessions are supported. If the current user's login shell is not zsh, the bootstrap requires an interactive terminal and invokes the user's `chsh` directly; failure to change the shell stops the setup.
 
@@ -71,27 +71,34 @@ The Linux zsh config assumes Debian/Ubuntu package paths for fzf and zsh plugins
 
 ## Packages
 
-`Brewfile` includes the core tooling this setup expects:
+The macOS package installer supports Apple Silicon macOS and must be run without `sudo`. `Brewfile` includes the core tooling this setup expects:
 
 - `bat`, `eza`, `fd`, `fzf`, `mise`, `ripgrep`, `zoxide`
 - `git`, `gh`, `gnupg`
 - `git-delta`
-- `shellcheck`
+- `shellcheck`, `shfmt`
 - `zsh-autosuggestions`, `zsh-syntax-highlighting`
 - `ghostty`
 - `font-jetbrains-mono-nerd-font`
 
+The Linux package set is intentionally explicit:
+
+- `bat`, `eza`, `fd-find`, `fzf`, `ripgrep`, `zoxide`
+- `git`, `gh`, `gnupg`, `jq`, `less`, `vim`
+- `shellcheck`, `shfmt`
+- `zsh`, `zsh-autosuggestions`, `zsh-syntax-highlighting`
+
+Linux leaves `git-delta` and `mise` out of the server profile.
+
 ## Validation
 
-Check shell config and scripts with:
+Run the repository's non-mutating checks with:
 
 ```bash
-zsh -n .zprofile
-zsh -n .zshrc
-zsh -n linux/.zshrc
-bash -n bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh
-shellcheck bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh
+./check
 ```
+
+This checks Bash and zsh syntax and formatting, runs ShellCheck, parses both Git configs, loads the Vim config, checks changed-line whitespace, and validates the Ghostty config on macOS.
 
 ## Terminal upgrades
 
@@ -101,7 +108,7 @@ Work-laptop Dart and Flutter paths stay supported in [`.zshrc`](.zshrc), but onl
 
 `mise` is installed and activated on macOS for project-local tool versions. This repo does not pin global language runtimes; individual projects can use `mise.toml` or `.tool-versions`. Local-only mise overrides such as `mise.local.toml` and `.mise.local.toml` are ignored globally.
 
-If Docker is installed, `install-packages` generates zsh completions into `~/.local/share/zsh/site-functions`.
+When Docker Desktop exists at `/Applications/Docker.app`, the macOS installer requires its canonical `/usr/local/bin/docker` command and atomically generates zsh completions into `~/.local/share/zsh/site-functions`. The Linux installer does the same when `/usr/bin/docker` is installed. Completion failures stop either installer instead of leaving a partial file.
 
 ## Git signing
 

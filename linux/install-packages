@@ -2,14 +2,43 @@
 
 set -euo pipefail
 
-if [[ "$(uname -s)" != "Linux" ]]; then
-  echo "linux/install-packages only supports Linux"
+die() {
+  printf 'error: %s\n' "$*" >&2
   exit 1
+}
+
+if [[ "$#" -ne 0 ]]; then
+  die "linux/install-packages does not accept arguments"
 fi
 
+if [[ "$(uname -s)" != "Linux" ]]; then
+  die "linux/install-packages only supports Linux"
+fi
+
+if [[ -n "${SUDO_USER:-}" ]]; then
+  die "run linux/install-packages as the target user, without sudo"
+fi
+
+if [[ ! -r /etc/os-release ]]; then
+  die "/etc/os-release is required"
+fi
+
+# shellcheck source=/dev/null
+source /etc/os-release
+
+case "${ID:-}:${VERSION_ID:-}" in
+  debian:13 | ubuntu:24.04 | ubuntu:26.04) ;;
+  *)
+    die "supported systems are Debian 13, Ubuntu 24.04, and Ubuntu 26.04"
+    ;;
+esac
+
 if ! command -v apt-get >/dev/null 2>&1; then
-  echo "linux/install-packages expects apt-get"
-  exit 1
+  die "apt-get is required"
+fi
+
+if ! command -v apt-cache >/dev/null 2>&1; then
+  die "apt-cache is required"
 fi
 
 packages=(
@@ -19,9 +48,12 @@ packages=(
   fzf
   gh
   git
-  git-delta
+  gnupg
+  jq
+  less
   ripgrep
   shellcheck
+  shfmt
   vim
   zoxide
   zsh
@@ -29,63 +61,121 @@ packages=(
   zsh-syntax-highlighting
 )
 
-available_packages=()
+LOCAL_BIN="$HOME/.local/bin"
+DOCKER_BIN="/usr/bin/docker"
+
+validate_command_alias() {
+  local link_path="$1"
+  local expected_target="$2"
+  local actual_target
+
+  if [[ -L "$link_path" ]]; then
+    actual_target="$(readlink "$link_path")"
+
+    if [[ "$actual_target" != "$expected_target" ]]; then
+      die "command alias must point exactly to $expected_target: $link_path"
+    fi
+
+    if [[ ! -e "$link_path" ]]; then
+      die "command alias is dangling: $link_path"
+    fi
+  elif [[ -e "$link_path" ]]; then
+    die "command alias must be absent or a canonical symlink: $link_path"
+  fi
+}
+
+validate_command_alias "$LOCAL_BIN/bat" /usr/bin/batcat
+validate_command_alias "$LOCAL_BIN/fd" /usr/bin/fdfind
+
+if [[ -L "$DOCKER_BIN" && ! -e "$DOCKER_BIN" ]]; then
+  die "Docker command is dangling: $DOCKER_BIN"
+fi
+
+if [[ -e "$DOCKER_BIN" && ! -x "$DOCKER_BIN" ]]; then
+  die "Docker command is not executable: $DOCKER_BIN"
+fi
 
 apt_get=(apt-get)
 
-if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
-  if ! sudo -n true 2>/dev/null; then
-    echo "linux/install-packages requires root or passwordless sudo"
-    exit 1
+if [[ "$EUID" -ne 0 ]]; then
+  if ! command -v sudo >/dev/null 2>&1; then
+    die "sudo is required for non-root installs"
   fi
 
-  apt_get=(sudo -n apt-get)
+  echo "Authenticating sudo..."
+  sudo -v
+  apt_get=(sudo apt-get)
 fi
 
 echo "Updating apt package metadata..."
 "${apt_get[@]}" update
 
+missing_packages=()
+
 for package in "${packages[@]}"; do
-  if apt-cache show "$package" >/dev/null 2>&1; then
-    available_packages+=("$package")
-  else
-    echo "warning: apt package not found: $package"
+  if ! apt-cache show "$package" >/dev/null 2>&1; then
+    missing_packages+=("$package")
   fi
 done
 
-if [[ "${#available_packages[@]}" -eq 0 ]]; then
-  echo "No requested apt packages are available."
+if [[ "${#missing_packages[@]}" -ne 0 ]]; then
+  printf 'error: required apt packages are unavailable:\n' >&2
+  printf '  - %s\n' "${missing_packages[@]}" >&2
   exit 1
 fi
 
 echo "Installing Linux packages..."
-"${apt_get[@]}" install -y "${available_packages[@]}"
+"${apt_get[@]}" install -y "${packages[@]}"
 
-LOCAL_BIN="$HOME/.local/bin"
+if [[ ! -x /usr/bin/batcat ]]; then
+  die "bat did not install the expected command: /usr/bin/batcat"
+fi
 
-link_command_alias() {
-  local name="$1"
-  local target="$2"
-  local target_path
+if [[ ! -x /usr/bin/fdfind ]]; then
+  die "fd-find did not install the expected command: /usr/bin/fdfind"
+fi
 
-  if command -v "$name" >/dev/null 2>&1; then
-    return
+mkdir -p "$LOCAL_BIN"
+
+if [[ ! -L "$LOCAL_BIN/bat" ]]; then
+  ln -s /usr/bin/batcat "$LOCAL_BIN/bat"
+fi
+
+if [[ ! -L "$LOCAL_BIN/fd" ]]; then
+  ln -s /usr/bin/fdfind "$LOCAL_BIN/fd"
+fi
+
+required_shell_files=(
+  /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+  /usr/share/doc/fzf/examples/completion.zsh
+  /usr/share/doc/fzf/examples/key-bindings.zsh
+  /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+)
+
+for shell_file in "${required_shell_files[@]}"; do
+  if [[ ! -r "$shell_file" ]]; then
+    die "package installation did not provide required shell file: $shell_file"
   fi
-
-  if target_path="$(command -v "$target")"; then
-    mkdir -p "$LOCAL_BIN"
-    ln -sfn "$target_path" "$LOCAL_BIN/$name"
-    printf 'linked %s -> %s\n' "$LOCAL_BIN/$name" "$target_path"
-  fi
-}
-
-link_command_alias bat batcat
-link_command_alias fd fdfind
+done
 
 ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
 
-if command -v docker >/dev/null 2>&1; then
+if [[ -x "$DOCKER_BIN" ]]; then
   echo "Installing Docker zsh completions..."
   mkdir -p "$ZSH_SITE_FUNCTIONS"
-  docker completion zsh > "$ZSH_SITE_FUNCTIONS/_docker"
+  completion_file="$(mktemp "$ZSH_SITE_FUNCTIONS/.docker.XXXXXX")"
+  trap 'rm -f "$completion_file"' EXIT
+
+  if ! "$DOCKER_BIN" completion zsh >"$completion_file"; then
+    die "Docker zsh completion generation failed"
+  fi
+
+  if [[ ! -s "$completion_file" ]]; then
+    die "Docker generated an empty zsh completion"
+  fi
+
+  chmod 0644 "$completion_file"
+  mv -f "$completion_file" "$ZSH_SITE_FUNCTIONS/_docker"
+  completion_file=""
+  trap - EXIT
 fi

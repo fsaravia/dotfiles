@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+if [[ "$#" -ne 0 ]]; then
+  die "check does not accept arguments"
+fi
+
+for required_command in bash git shellcheck shfmt vim zsh; do
+  if ! command -v "$required_command" >/dev/null 2>&1; then
+    die "$required_command is required; run the package installer first"
+  fi
+done
+
+cd "$ROOT_DIR"
+
+bash_scripts=(
+  bootstrap
+  check
+  install-packages
+  linux/bootstrap
+  linux/install-packages
+  macos-defaults.sh
+)
+
+zsh_configs=(
+  .zprofile
+  .zshrc
+  linux/.zshrc
+)
+
+echo "Checking Bash syntax..."
+for script in "${bash_scripts[@]}"; do
+  bash -n "$script"
+done
+
+echo "Checking zsh syntax..."
+for config in "${zsh_configs[@]}"; do
+  zsh -n "$config"
+done
+
+echo "Running ShellCheck..."
+shellcheck "${bash_scripts[@]}"
+
+echo "Checking Bash formatting..."
+shfmt -d -i 2 -ci "${bash_scripts[@]}"
+
+echo "Checking zsh formatting..."
+shfmt -ln zsh -d -i 2 -ci "${zsh_configs[@]}"
+
+echo "Parsing Git configuration..."
+git config --file git/config --list >/dev/null
+git config --file linux/git/config --list >/dev/null
+
+echo "Loading Vim configuration..."
+vim -Nu .vimrc -n -es -i NONE '+quitall'
+
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  GHOSTTY_BIN="/Applications/Ghostty.app/Contents/MacOS/ghostty"
+
+  if [[ ! -x "$GHOSTTY_BIN" ]]; then
+    die "Ghostty is required; run the package installer first"
+  fi
+
+  echo "Validating Ghostty configuration..."
+  "$GHOSTTY_BIN" +validate-config --config-file=ghostty/config.ghostty
+fi
+
+echo "Checking whitespace..."
+if git grep -nI -E '[[:blank:]]+$'; then
+  die "tracked files contain trailing whitespace"
+fi
+
+git diff --check
+git diff --cached --check
+
+echo "All checks passed."

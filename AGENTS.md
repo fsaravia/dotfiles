@@ -11,11 +11,12 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - `ghostty/` is linked to `~/.config/ghostty`.
 - `Brewfile` is the source of truth for Homebrew packages expected by the shell.
 - `bootstrap` supports Apple Silicon macOS, rejects root and sudo-wrapped execution, creates symlinks, and preserves replaced paths in a private `~/.dotfiles-backups/<timestamp>/` tree.
-- `install-packages` installs Homebrew if needed, runs `brew bundle`, and generates optional Docker zsh completions when Docker is present.
+- `install-packages` supports Apple Silicon macOS, installs Homebrew from a fully downloaded installer when needed, runs `brew bundle --jobs auto`, and requires valid Docker zsh completions when Docker Desktop is installed.
 - `linux/` contains the Linux profile for owned Debian/Ubuntu-style hosts.
-- `linux/install-packages` installs apt packages, creates local `bat`/`fd` command aliases for Debian-style `batcat`/`fdfind` packages when needed, and generates optional Docker zsh completions when Docker is present.
 - `linux/bootstrap` rejects sudo-wrapped execution, creates Linux symlinks, preserves replaced paths in a private backup tree, and uses the current user's `chsh` directly when the login shell must change.
+- `linux/install-packages` supports Debian 13 and Ubuntu 24.04 or 26.04, requires its full apt package set, creates canonical local `bat`/`fd` links, asserts the shell plugin paths, and requires valid Docker zsh completions when Docker is present.
 - `macos-defaults.sh` applies opt-in macOS preferences.
+- `check` runs syntax, formatting, Git, Vim, whitespace, and macOS Ghostty validation.
 
 ## Editing Principles
 
@@ -32,14 +33,18 @@ This is Federico's personal dotfiles repo for Apple Silicon macOS and owned Linu
 - `.zshrc` and `linux/.zshrc` intentionally duplicate common shell behavior. When editing one, check whether the same practical behavior should carry to the other, while preserving OS-specific differences.
 - `git/config` and `linux/git/config` intentionally differ around macOS-only `delta` integration. Keep shared aliases, push behavior, conflict handling, and mandatory commit signing aligned.
 
+## Package Policy
+
+- `Brewfile` is the complete Apple Silicon macOS package set. The shell expects those commands and plugin files to exist after `install-packages` succeeds.
+- `linux/install-packages` has one required package set for Debian 13 and Ubuntu 24.04 or 26.04. Missing apt packages are fatal; do not restore partial installation behavior.
+- Linux uses the distribution commands at `/usr/bin/batcat` and `/usr/bin/fdfind` through canonical links in `~/.local/bin`.
+- Docker is optional. When Docker Desktop or `/usr/bin/docker` is present, completion generation is required to succeed and must replace `_docker` atomically.
+
 ## Validation
 
-Run the lightest relevant checks after edits:
+Run the repository checks after edits:
 
-- `.zprofile`: `zsh -n .zprofile`
-- `.zshrc`: `zsh -n .zshrc`
-- `linux/.zshrc`: `zsh -n linux/.zshrc`
-- Bash scripts: `bash -n bootstrap linux/bootstrap install-packages linux/install-packages macos-defaults.sh`
+- All shell files: `./check`
 - Brewfile changes: `brew bundle check --file Brewfile` when Homebrew is available and checking the local machine is useful.
 
 Avoid running `bootstrap`, `linux/bootstrap`, `install-packages`, `linux/install-packages`, or `macos-defaults.sh` without the user's explicit intent. They mutate the user's home directory, install software, or change system preferences.
