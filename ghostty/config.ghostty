@@ -3,11 +3,10 @@ font-family = "JetBrainsMono Nerd Font"
 font-size = 14
 window-padding-x = 14
 window-padding-y = 12
-window-theme = ghostty
 macos-titlebar-style = tabs
 macos-option-as-alt = true
 
-shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
+shell-integration-features = sudo,ssh-env,ssh-terminfo
 clipboard-read = ask
 clipboard-write = allow
 copy-on-select = clipboard
@@ -15,7 +14,3 @@ confirm-close-surface = true
 
 keybind = cmd+shift+left=previous_tab
 keybind = cmd+shift+right=next_tab
-keybind = alt+left=text:\x1bb
-keybind = alt+right=text:\x1bf
-keybind = performable:cmd+c=copy_to_clipboard
-keybind = cmd+v=paste_from_clipboard
