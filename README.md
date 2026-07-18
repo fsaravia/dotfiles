@@ -42,7 +42,7 @@ Owned Linux hosts can use the Linux profile:
 ./linux/bootstrap
 ```
 
-The Linux package installer supports Debian 13 and Ubuntu 24.04 or 26.04. Run it directly, never through `sudo`; normal users authenticate once with `sudo -v`, while genuine root sessions run apt directly. It validates the distribution and complete package set before installing anything. It links `~/.local/bin/bat` and `~/.local/bin/fd` to the canonical Debian-family commands at `/usr/bin/batcat` and `/usr/bin/fdfind`. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
+The Linux package installer supports Debian 13 and Ubuntu 24.04 or 26.04. Run it directly, never through `sudo`; normal users reuse passwordless sudo when available or authenticate once with `sudo -v`, while genuine root sessions run apt directly. It validates the distribution and complete package set before installing anything. It links `~/.local/bin/bat` and `~/.local/bin/fd` to the canonical Debian-family commands at `/usr/bin/batcat` and `/usr/bin/fdfind`. The Linux profile links the shared Vim and Git ignore files, but uses [`linux/.zshrc`](linux/.zshrc) and [`linux/git/config`](linux/git/config).
 
 Run `linux/bootstrap` directly, never through `sudo`. It supports the same three distributions and requires zsh at `/usr/bin/zsh`. If the current user's login shell differs, it invokes `chsh` directly; failure to change the shell stops the setup.
 

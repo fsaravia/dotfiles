@@ -126,8 +126,11 @@ if [[ "$EUID" -ne 0 ]]; then
     die "sudo is required for non-root installs"
   fi
 
-  echo "Authenticating sudo..."
-  sudo -v
+  if ! sudo -n apt-get --version >/dev/null 2>&1; then
+    echo "Authenticating sudo..."
+    sudo -v
+  fi
+
   apt_get=(sudo apt-get)
 fi
 
