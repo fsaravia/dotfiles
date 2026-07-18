@@ -21,6 +21,7 @@
 	lg = log -p
 	ll = log --graph --pretty=format:'%C(cyan)%h%Creset -%C(yellow)%d%Creset %s - %C(yellow)%aN%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
 	f = fetch
+	fetchrebase = !git fetch && git rebase @{u}
 	changelog = log --abbrev-commit --pretty=format:'- %h - %s - %aN'
 	graph = log --graph --decorate --oneline --all
 
