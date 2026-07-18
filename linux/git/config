@@ -4,6 +4,7 @@
 
 [push]
 	default = simple
+	autoSetupRemote = true
 
 [color]
 	ui = true
@@ -15,13 +16,17 @@
 	st = status
 	ci = commit
 	br = branch
-	co = checkout
+	sw = switch
 	df = diff
 	lg = log -p
 	ll = log --graph --pretty=format:'%C(cyan)%h%Creset -%C(yellow)%d%Creset %s - %C(yellow)%aN%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
-	f  = fetch --prune
+	f = fetch
+	fetchrebase = !git fetch && git rebase @{u}
 	changelog = log --abbrev-commit --pretty=format:'- %h - %s - %aN'
 	graph = log --graph --decorate --oneline --all
+
+[commit]
+	gpgsign = true
 
 [init]
 	defaultBranch = main
@@ -37,6 +42,3 @@
 
 [rerere]
 	enabled = true
-
-[include]
-	path = ~/.config/git/config.local

@@ -1,11 +1,9 @@
-export LANG="en_US.UTF-8"
-export EDITOR="${EDITOR:-vim}"
-export VISUAL="$EDITOR"
-export PAGER="${PAGER:-less}"
+export LANG="C.UTF-8"
+export EDITOR="vim"
+export VISUAL="vim"
+export PAGER="less"
 
-if [[ -t 0 ]]; then
-  export GPG_TTY="$(tty)"
-fi
+export GPG_TTY="$(tty)"
 
 # Keep PATH/fpath deduplicated as we prepend toolchains below.
 typeset -U path fpath
@@ -22,7 +20,6 @@ setopt hist_ignore_all_dups
 setopt hist_ignore_space
 setopt hist_reduce_blanks
 setopt hist_verify
-setopt inc_append_history
 setopt interactive_comments
 setopt prompt_subst
 setopt share_history
@@ -31,21 +28,20 @@ setopt share_history
 WORDCHARS="${WORDCHARS//\/}"
 WORDCHARS="${WORDCHARS//-}"
 
-mkdir -p "$HOME/.local/state/zsh"
+[[ -d "$HOME/.local/state/zsh" ]] || mkdir -p "$HOME/.local/state/zsh"
 export HISTFILE="$HOME/.local/state/zsh/history"
 export HISTSIZE=50000
 export SAVEHIST=50000
 
 # Completion and prompt helpers.
-autoload -Uz compinit colors vcs_info
+autoload -Uz add-zsh-hook compinit vcs_info
 zmodload zsh/complist
-colors
 
 if [[ -d "$HOME/.local/share/zsh/site-functions" ]]; then
   fpath=("$HOME/.local/share/zsh/site-functions" $fpath)
 fi
 
-mkdir -p "$HOME/.cache/zsh"
+[[ -d "$HOME/.cache/zsh" ]] || mkdir -p "$HOME/.cache/zsh"
 compinit -d "$HOME/.cache/zsh/.zcompdump"
 
 zstyle ':completion:*' menu select
@@ -55,9 +51,7 @@ zstyle ':vcs_info:git:*' formats ' %F{244}on %F{81}%b%f'
 zstyle ':vcs_info:git:*' actionformats ' %F{244}on %F{81}%b|%a%f'
 
 # Refresh Git branch info before each prompt render.
-precmd() {
-  vcs_info
-}
+add-zsh-hook precmd vcs_info
 
 remote_context=''
 if [[ -n "${SSH_CONNECTION:-}${SSH_CLIENT:-}${SSH_TTY:-}" ]]; then
@@ -73,7 +67,6 @@ alias ls='eza --group-directories-first --icons=auto'
 alias ll='eza -lah --git --group-directories-first --icons=auto'
 
 alias grep='grep --color=auto'
-alias fetchrebase='git fetch --prune && git rebase @{u}'
 
 # Linux shell niceties.
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh

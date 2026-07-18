@@ -4,19 +4,123 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BREW_BIN="/opt/homebrew/bin/brew"
+DOCKER_APP="/Applications/Docker.app"
+DOCKER_BIN="/usr/local/bin/docker"
+ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
+DOCKER_COMPLETION="$ZSH_SITE_FUNCTIONS/_docker"
+
+installer_file=""
+completion_file=""
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+cleanup() {
+  if [[ -n "$installer_file" ]]; then
+    rm -f "$installer_file"
+  fi
+
+  if [[ -n "$completion_file" ]]; then
+    rm -f "$completion_file"
+  fi
+}
+
+validate_directory_destination() {
+  local directory="$1"
+  local existing_path="$directory"
+
+  while [[ ! -e "$existing_path" && ! -L "$existing_path" ]]; do
+    existing_path="$(dirname "$existing_path")"
+  done
+
+  if [[ -L "$existing_path" || ! -d "$existing_path" || ! -w "$existing_path" ]]; then
+    die "directory path must resolve through writable regular directories: $directory"
+  fi
+}
+
+trap cleanup EXIT
+
+if [[ "$#" -ne 0 ]]; then
+  die "install-packages does not accept arguments"
+fi
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  die "install-packages only supports macOS"
+fi
+
+if [[ "$(uname -m)" != "arm64" ]]; then
+  die "install-packages only supports Apple Silicon"
+fi
+
+macos_version="$(sw_vers -productVersion)"
+
+if [[ "${macos_version%%.*}" != "26" ]]; then
+  die "install-packages requires macOS 26; found $macos_version"
+fi
+
+if ! LC_ALL=en_US.UTF-8 /usr/bin/locale charmap >/dev/null 2>&1; then
+  die "install-packages requires the en_US.UTF-8 locale"
+fi
+
+if [[ "$EUID" -eq 0 || -n "${SUDO_USER:-}" ]]; then
+  die "run install-packages as the target user, without sudo"
+fi
+
+if [[ ! -r "$ROOT_DIR/Brewfile" ]]; then
+  die "Brewfile is not readable: $ROOT_DIR/Brewfile"
+fi
+
+if [[ -d "$DOCKER_APP" ]]; then
+  if [[ ! -f "$DOCKER_BIN" || ! -x "$DOCKER_BIN" ]]; then
+    die "Docker Desktop is installed but $DOCKER_BIN is not an executable file"
+  fi
+
+  validate_directory_destination "$ZSH_SITE_FUNCTIONS"
+
+  if [[ -L "$DOCKER_COMPLETION" || (-e "$DOCKER_COMPLETION" && ! -f "$DOCKER_COMPLETION") ]]; then
+    die "Docker completion must be absent or a regular file: $DOCKER_COMPLETION"
+  fi
+fi
 
 if [[ ! -x "$BREW_BIN" ]]; then
   echo "Installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  installer_file="$(mktemp -t homebrew-install.XXXXXX)"
+  /usr/bin/curl --fail --silent --show-error --location \
+    --output "$installer_file" \
+    https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+
+  if [[ ! -s "$installer_file" ]]; then
+    die "downloaded Homebrew installer is empty"
+  fi
+
+  /bin/bash "$installer_file"
+  rm -f "$installer_file"
+  installer_file=""
+fi
+
+if [[ ! -x "$BREW_BIN" ]]; then
+  die "Homebrew is not executable after installation: $BREW_BIN"
 fi
 
 echo "Installing packages from Brewfile..."
-"$BREW_BIN" bundle --file "$ROOT_DIR/Brewfile"
+"$BREW_BIN" bundle install --file "$ROOT_DIR/Brewfile" --jobs auto
 
-ZSH_SITE_FUNCTIONS="$HOME/.local/share/zsh/site-functions"
-
-if command -v docker >/dev/null 2>&1; then
+if [[ -d "$DOCKER_APP" ]]; then
   echo "Installing Docker zsh completions..."
   mkdir -p "$ZSH_SITE_FUNCTIONS"
-  docker completion zsh > "$ZSH_SITE_FUNCTIONS/_docker"
+  completion_file="$(mktemp "$ZSH_SITE_FUNCTIONS/.docker.XXXXXX")"
+
+  if ! "$DOCKER_BIN" completion zsh >"$completion_file"; then
+    die "Docker zsh completion generation failed"
+  fi
+
+  if [[ ! -s "$completion_file" ]]; then
+    die "Docker generated an empty zsh completion"
+  fi
+
+  chmod 0644 "$completion_file"
+  mv -f "$completion_file" "$DOCKER_COMPLETION"
+  completion_file=""
 fi

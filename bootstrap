@@ -1,39 +1,202 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+umask 077
+
+if [[ "$#" -ne 0 ]]; then
+  printf 'usage: %s\n' "$0"
+  exit 1
+fi
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP_DIR="$HOME/.dotfiles-backups/$(date +"%Y%m%d-%H%M%S")"
+BACKUP_ROOT="$HOME/.dotfiles-backups"
+BACKUP_DIR="$BACKUP_ROOT/$(date +"%Y%m%d-%H%M%S")"
+MACHINE_GIT_CONFIG="$HOME/.gitconfig"
+GIT_BIN="/opt/homebrew/bin/git"
+MISSING_SIGNING_KEY="0000000000000000000000000000000000000000!"
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "bootstrap only supports macOS"
+  exit 1
+fi
+
+if [[ "$(uname -m)" != "arm64" ]]; then
+  echo "bootstrap only supports Apple Silicon"
+  exit 1
+fi
+
+macos_version="$(sw_vers -productVersion)"
+
+if [[ "${macos_version%%.*}" != "26" ]]; then
+  printf 'bootstrap requires macOS 26; found %s\n' "$macos_version"
+  exit 1
+fi
+
+if ! LC_ALL=en_US.UTF-8 /usr/bin/locale charmap >/dev/null 2>&1; then
+  echo "bootstrap requires the en_US.UTF-8 locale"
+  exit 1
+fi
+
+if [[ "${EUID:-$(id -u)}" -eq 0 || -n "${SUDO_USER:-}" ]]; then
+  echo "bootstrap must be run as a regular user without sudo"
+  exit 1
+fi
 
 links=(
   "$ROOT_DIR/git/config:$HOME/.config/git/config"
   "$ROOT_DIR/git/ignore:$HOME/.config/git/ignore"
+  "$ROOT_DIR/.zprofile:$HOME/.zprofile"
   "$ROOT_DIR/.zshrc:$HOME/.zshrc"
   "$ROOT_DIR/.vimrc:$HOME/.vimrc"
   "$ROOT_DIR/ghostty:$HOME/.config/ghostty"
 )
 
+backup_required=false
+
+for entry in "${links[@]}"; do
+  source_path="${entry%%:*}"
+  destination="${entry#*:}"
+
+  if [[ ! -e "$source_path" ]]; then
+    printf 'required source is missing: %s\n' "$source_path"
+    exit 1
+  fi
+
+  if [[ -e "$destination" && ! -L "$destination" && ! -f "$destination" && ! -d "$destination" ]]; then
+    printf 'unsupported destination type: %s\n' "$destination"
+    exit 1
+  fi
+
+  destination_parent="$(dirname "$destination")"
+
+  while [[ ! -e "$destination_parent" && ! -L "$destination_parent" ]]; do
+    destination_parent="$(dirname "$destination_parent")"
+  done
+
+  if [[ ! -d "$destination_parent" || ! -w "$destination_parent" ]]; then
+    printf 'destination parent is not a writable directory: %s\n' "$destination_parent"
+    exit 1
+  fi
+
+  if [[ -L "$destination" ]]; then
+    if [[ "$(readlink "$destination")" != "$source_path" ]]; then
+      backup_required=true
+    fi
+  elif [[ -e "$destination" ]]; then
+    backup_required=true
+  fi
+done
+
+if [[ -L "$BACKUP_ROOT" || (-e "$BACKUP_ROOT" && ! -d "$BACKUP_ROOT") ]]; then
+  printf '%s must be a regular directory, not a symlink or special file\n' "$BACKUP_ROOT"
+  exit 1
+fi
+
+if [[ -d "$BACKUP_ROOT" && ! -w "$BACKUP_ROOT" ]]; then
+  printf 'backup directory is not writable: %s\n' "$BACKUP_ROOT"
+  exit 1
+fi
+
+if [[ -d "$BACKUP_ROOT" && ! -O "$BACKUP_ROOT" ]]; then
+  printf 'backup directory must be owned by the current user: %s\n' "$BACKUP_ROOT"
+  exit 1
+fi
+
+if [[ "$backup_required" == true && (-e "$BACKUP_DIR" || -L "$BACKUP_DIR") ]]; then
+  printf 'backup destination already exists: %s\n' "$BACKUP_DIR"
+  exit 1
+fi
+
+if [[ -L "$MACHINE_GIT_CONFIG" || (-e "$MACHINE_GIT_CONFIG" && ! -f "$MACHINE_GIT_CONFIG") ]]; then
+  printf '%s must be a regular file, not a symlink or special file\n' "$MACHINE_GIT_CONFIG"
+  exit 1
+fi
+
+if [[ -f "$MACHINE_GIT_CONFIG" && ! -O "$MACHINE_GIT_CONFIG" ]]; then
+  printf '%s must be owned by the current user\n' "$MACHINE_GIT_CONFIG"
+  exit 1
+fi
+
+if [[ ! -x "$GIT_BIN" ]]; then
+  printf 'bootstrap requires %s\n' "$GIT_BIN"
+  exit 1
+fi
+
+if [[ -f "$MACHINE_GIT_CONFIG" ]]; then
+  if ! machine_git_keys="$("$GIT_BIN" config --file "$MACHINE_GIT_CONFIG" --name-only --list)"; then
+    printf 'could not parse %s\n' "$MACHINE_GIT_CONFIG"
+    exit 1
+  fi
+
+  signing_key_count=0
+
+  while IFS= read -r key; do
+    if [[ -n "$key" && "$key" != "user.signingkey" ]]; then
+      printf '%s may contain only user.signingkey\n' "$MACHINE_GIT_CONFIG"
+      exit 1
+    fi
+
+    if [[ "$key" == "user.signingkey" ]]; then
+      ((signing_key_count += 1))
+    fi
+  done <<<"$machine_git_keys"
+
+  if [[ "$signing_key_count" -ne 1 ]] || ! signing_key="$("$GIT_BIN" config --file "$MACHINE_GIT_CONFIG" --get user.signingkey)" || [[ -z "$signing_key" ]]; then
+    printf '%s must contain exactly one nonempty user.signingkey\n' "$MACHINE_GIT_CONFIG"
+    exit 1
+  fi
+fi
+
 backup_path() {
   local destination="$1"
+  local relative_path="${destination#"$HOME"/}"
+  local backup_destination="$BACKUP_DIR/$relative_path"
 
-  mkdir -p "$BACKUP_DIR"
-  mv "$destination" "$BACKUP_DIR/$(basename "$destination")"
-  printf 'backed up %s to %s\n' "$destination" "$BACKUP_DIR"
+  mkdir -p "$(dirname "$backup_destination")"
+  mv "$destination" "$backup_destination"
+  printf 'backed up %s to %s\n' "$destination" "$backup_destination"
 }
 
 link_path() {
   local source="$1"
   local destination="$2"
+  local current_target
 
   mkdir -p "$(dirname "$destination")"
 
-  if [[ -e "$destination" && ! -L "$destination" ]]; then
+  if [[ -L "$destination" ]]; then
+    current_target="$(readlink "$destination")"
+
+    if [[ "$current_target" == "$source" ]]; then
+      printf 'already linked %s -> %s\n' "$destination" "$source"
+      return
+    fi
+
+    backup_path "$destination"
+  elif [[ -e "$destination" ]]; then
     backup_path "$destination"
   fi
 
-  ln -sfn "$source" "$destination"
+  ln -s "$source" "$destination"
   printf 'linked %s -> %s\n' "$destination" "$source"
 }
+
+if [[ "$backup_required" == true ]]; then
+  if [[ -d "$BACKUP_ROOT" ]]; then
+    chmod 700 "$BACKUP_ROOT"
+  else
+    mkdir -m 700 "$BACKUP_ROOT"
+  fi
+
+  mkdir -m 700 "$BACKUP_DIR"
+fi
+
+if [[ -f "$MACHINE_GIT_CONFIG" ]]; then
+  chmod 600 "$MACHINE_GIT_CONFIG"
+else
+  printf '[user]\n\tsigningkey = %s\n' "$MISSING_SIGNING_KEY" >"$MACHINE_GIT_CONFIG"
+  chmod 600 "$MACHINE_GIT_CONFIG"
+fi
 
 for entry in "${links[@]}"; do
   link_path "${entry%%:*}" "${entry#*:}"
