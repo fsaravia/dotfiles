@@ -111,7 +111,7 @@ On macOS, Git diff, show, and patch logs are rendered through `delta`. Use `z <d
 
 Work-laptop Dart and Flutter paths stay supported in [`.zshrc`](.zshrc), but only when `~/.pub-cache/bin` or `~/Development/flutter/bin` exist.
 
-`mise` is installed and activated on macOS for project-local tool versions. This repo does not pin global language runtimes; individual projects can use `mise.toml` or `.tool-versions`. Local-only mise overrides such as `mise.local.toml` and `.mise.local.toml` are ignored globally.
+`mise` is installed and activated on macOS for project-local tool versions. This repo does not pin global language runtimes; individual projects can use `mise.toml` or `.tool-versions`. Local-only mise overrides use `mise.local.toml`, which is ignored globally.
 
 When Docker Desktop exists at `/Applications/Docker.app`, the macOS installer requires its canonical `/usr/local/bin/docker` command and atomically generates zsh completions into `~/.local/share/zsh/site-functions`. The Linux installer does the same when `/usr/bin/docker` is installed. Completion failures stop either installer instead of leaving a partial file.
 
