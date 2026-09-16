@@ -3,7 +3,7 @@ font-family = "JetBrainsMono Nerd Font"
 font-size = 14
 window-padding-x = 14
 window-padding-y = 12
-macos-titlebar-style = tabs
+macos-titlebar-style = transparent
 macos-option-as-alt = true
 
 shell-integration-features = sudo,ssh-env,ssh-terminfo
