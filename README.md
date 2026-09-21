@@ -55,7 +55,7 @@ Run `linux/bootstrap` directly, never through `sudo`. It supports the same three
 - `~/.vimrc`
 - `~/.config/ghostty`
 
-The macOS `.zprofile` initializes Homebrew from `/opt/homebrew` for login shells. Homebrew and the shell tools managed by `Brewfile` are required; the startup files do not hide missing installations.
+The macOS `.zprofile` initializes Homebrew from `/opt/homebrew` and Mise shims for login shells. This keeps project-local tool versions available to non-interactive login shells while `.zshrc` provides full interactive Mise activation. Homebrew and the shell tools managed by `Brewfile` are required; the startup files do not hide missing installations.
 
 If a destination already exists as a real file or directory, or as a wrong or dangling symlink, `bootstrap` moves it into a private `~/.dotfiles-backups/<timestamp>/` tree while preserving its path below `HOME`. A symlink already pointing to the expected tracked file is left untouched. Both bootstraps validate their arguments, platform, execution context, sources, destinations, backup root, machine-local Git config, and login-shell requirements before creating links.
 
